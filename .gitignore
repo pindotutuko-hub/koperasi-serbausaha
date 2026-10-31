@@ -1,0 +1,30 @@
+# Hasil build
+build/
+dist/
+installer_output/
+*.spec.bak
+
+# Lingkungan virtual
+.venv/
+venv/
+env/
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Basis data & keluaran lokal
+*.db
+*.db-journal
+Laporan/
+backup/
+
+# Sistem
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# macOS
+*.dmg
+PembukuanKantin-Portable*/

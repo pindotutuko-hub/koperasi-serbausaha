@@ -1,0 +1,29 @@
+KETENTUAN PEMAKAIAN
+Program Pembukuan Kantin Koperasi versi 1.0.0
+
+1. Program ini dibuat untuk keperluan pembukuan unit usaha kantin
+   koperasi dan boleh digunakan, disalin, serta disesuaikan secara
+   bebas oleh koperasi mana pun tanpa biaya.
+
+2. Program disediakan apa adanya (as is). Ketepatan angka pada
+   laporan bergantung sepenuhnya pada kebenaran data yang diinput
+   oleh pengguna. Pengurus koperasi tetap bertanggung jawab
+   memeriksa dan mengesahkan laporan sebelum digunakan sebagai
+   dokumen resmi atau bahan pertanggungjawaban rapat anggota.
+
+3. Data pembukuan tersimpan di komputer pengguna, bukan di
+   internet. Pengguna wajib melakukan pencadangan (backup) secara
+   berkala melalui menu Berkas > Cadangkan Data, dan menyimpan
+   salinannya di media lain (flashdisk, hard disk eksternal, atau
+   penyimpanan awan).
+
+4. Pembuat program tidak bertanggung jawab atas kehilangan data
+   akibat kerusakan perangkat keras, serangan virus, penghapusan
+   tidak sengaja, atau kelalaian pencadangan.
+
+5. Program ini menggunakan pustaka pihak ketiga berlisensi terbuka:
+   - Python (PSF License)
+   - ReportLab Toolkit (BSD License)
+   - openpyxl (MIT License)
+   - pypdf (BSD License)
+   Masing-masing lisensi tetap berlaku bagi pustaka tersebut.

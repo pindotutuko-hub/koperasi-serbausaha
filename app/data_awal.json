@@ -1,0 +1,249 @@
+{
+  "_catatan": [
+    "Berkas ini memuat bagan akun (COA) bawaan untuk unit usaha kantin/toko.",
+    "Saldo awal dan jurnal sengaja dikosongkan agar repositori ini tidak",
+    "memuat angka pembukuan milik koperasi mana pun.",
+    "",
+    "Saat program pertama kali dijalankan, isi saldo awal lewat tab",
+    "'Saldo Awal', lalu mulai mencatat transaksi di tab 'Jurnal Transaksi'",
+    "atau impor dari Excel memakai template yang disediakan program."
+  ],
+  "akun": [
+    {
+      "kode": "111",
+      "nama": "Kas",
+      "kategori": "Aset",
+      "subkategori": "Aktiva Lancar",
+      "saldo_normal": "Debet",
+      "peran": "KAS",
+      "urut": 1
+    },
+    {
+      "kode": "112",
+      "nama": "Bank",
+      "kategori": "Aset",
+      "subkategori": "Aktiva Lancar",
+      "saldo_normal": "Debet",
+      "peran": "BANK",
+      "urut": 2
+    },
+    {
+      "kode": "113",
+      "nama": "Piutang",
+      "kategori": "Aset",
+      "subkategori": "Aktiva Lancar",
+      "saldo_normal": "Debet",
+      "peran": "",
+      "urut": 3
+    },
+    {
+      "kode": "114",
+      "nama": "Persediaan Barang Toko",
+      "kategori": "Aset",
+      "subkategori": "Aktiva Lancar",
+      "saldo_normal": "Debet",
+      "peran": "PERSEDIAAN",
+      "urut": 4
+    },
+    {
+      "kode": "115",
+      "nama": "Perlengkapan Toko",
+      "kategori": "Aset",
+      "subkategori": "Aktiva Lancar",
+      "saldo_normal": "Debet",
+      "peran": "",
+      "urut": 5
+    },
+    {
+      "kode": "121",
+      "nama": "Peralatan",
+      "kategori": "Aset",
+      "subkategori": "Aktiva Tetap",
+      "saldo_normal": "Debet",
+      "peran": "",
+      "urut": 6
+    },
+    {
+      "kode": "122",
+      "nama": "Akumulasi Penyusutan Peralatan",
+      "kategori": "Aset",
+      "subkategori": "Aktiva Tetap",
+      "saldo_normal": "Kredit",
+      "peran": "",
+      "urut": 7
+    },
+    {
+      "kode": "211",
+      "nama": "Utang Usaha",
+      "kategori": "Kewajiban",
+      "subkategori": "Kewajiban",
+      "saldo_normal": "Kredit",
+      "peran": "",
+      "urut": 8
+    },
+    {
+      "kode": "212",
+      "nama": "Utang Lain-lain",
+      "kategori": "Kewajiban",
+      "subkategori": "Kewajiban",
+      "saldo_normal": "Kredit",
+      "peran": "",
+      "urut": 9
+    },
+    {
+      "kode": "311",
+      "nama": "Simpanan Pokok",
+      "kategori": "Modal",
+      "subkategori": "Modal",
+      "saldo_normal": "Kredit",
+      "peran": "",
+      "urut": 10
+    },
+    {
+      "kode": "312",
+      "nama": "Simpanan Wajib",
+      "kategori": "Modal",
+      "subkategori": "Modal",
+      "saldo_normal": "Kredit",
+      "peran": "",
+      "urut": 11
+    },
+    {
+      "kode": "313",
+      "nama": "Modal Yayasan",
+      "kategori": "Modal",
+      "subkategori": "Modal",
+      "saldo_normal": "Kredit",
+      "peran": "",
+      "urut": 12
+    },
+    {
+      "kode": "314",
+      "nama": "Laba Ditahan",
+      "kategori": "Modal",
+      "subkategori": "Modal",
+      "saldo_normal": "Kredit",
+      "peran": "LABA_DITAHAN",
+      "urut": 13
+    },
+    {
+      "kode": "411",
+      "nama": "Penjualan Kantin",
+      "kategori": "Pendapatan",
+      "subkategori": "Pendapatan",
+      "saldo_normal": "Kredit",
+      "peran": "",
+      "urut": 14
+    },
+    {
+      "kode": "412",
+      "nama": "Penjualan Seragam & ATK",
+      "kategori": "Pendapatan",
+      "subkategori": "Pendapatan",
+      "saldo_normal": "Kredit",
+      "peran": "",
+      "urut": 15
+    },
+    {
+      "kode": "413",
+      "nama": "Retur & Potongan Penjualan",
+      "kategori": "Pendapatan",
+      "subkategori": "Pendapatan",
+      "saldo_normal": "Debet",
+      "peran": "RETUR_JUAL",
+      "urut": 16
+    },
+    {
+      "kode": "511",
+      "nama": "Pembelian Barang Dagang",
+      "kategori": "HPP",
+      "subkategori": "HPP",
+      "saldo_normal": "Debet",
+      "peran": "PEMBELIAN",
+      "urut": 17
+    },
+    {
+      "kode": "512",
+      "nama": "Beban Angkut Pembelian",
+      "kategori": "HPP",
+      "subkategori": "HPP",
+      "saldo_normal": "Debet",
+      "peran": "ANGKUT_BELI",
+      "urut": 18
+    },
+    {
+      "kode": "513",
+      "nama": "Retur Pembelian",
+      "kategori": "HPP",
+      "subkategori": "HPP",
+      "saldo_normal": "Kredit",
+      "peran": "RETUR_BELI",
+      "urut": 19
+    },
+    {
+      "kode": "514",
+      "nama": "Potongan Pembelian",
+      "kategori": "HPP",
+      "subkategori": "HPP",
+      "saldo_normal": "Kredit",
+      "peran": "POTONGAN_BELI",
+      "urut": 20
+    },
+    {
+      "kode": "611",
+      "nama": "Beban Gaji / Honor",
+      "kategori": "Beban",
+      "subkategori": "Beban",
+      "saldo_normal": "Debet",
+      "peran": "",
+      "urut": 21
+    },
+    {
+      "kode": "612",
+      "nama": "Beban Listrik & Air",
+      "kategori": "Beban",
+      "subkategori": "Beban",
+      "saldo_normal": "Debet",
+      "peran": "",
+      "urut": 22
+    },
+    {
+      "kode": "613",
+      "nama": "Beban ATK & Perlengkapan",
+      "kategori": "Beban",
+      "subkategori": "Beban",
+      "saldo_normal": "Debet",
+      "peran": "",
+      "urut": 23
+    },
+    {
+      "kode": "614",
+      "nama": "Beban Penyusutan Peralatan",
+      "kategori": "Beban",
+      "subkategori": "Beban",
+      "saldo_normal": "Debet",
+      "peran": "",
+      "urut": 24
+    },
+    {
+      "kode": "615",
+      "nama": "Beban Pemeliharaan",
+      "kategori": "Beban",
+      "subkategori": "Beban",
+      "saldo_normal": "Debet",
+      "peran": "",
+      "urut": 25
+    },
+    {
+      "kode": "619",
+      "nama": "Beban Lain-lain",
+      "kategori": "Beban",
+      "subkategori": "Beban",
+      "saldo_normal": "Debet",
+      "peran": "",
+      "urut": 26
+    }
+  ],
+  "saldo_awal": [],
+  "jurnal": {}
+}

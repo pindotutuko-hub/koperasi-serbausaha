@@ -1,0 +1,219 @@
+name: Bangun Aplikasi (Windows + macOS)
+
+# Membangun semua versi di server GitHub, tanpa perlu memasang apa pun
+# di komputer sendiri.
+#
+# Cara menjalankan:
+#   Buka tab Actions > pilih "Bangun Aplikasi (Windows + macOS)"
+#   > klik "Run workflow". Tunggu 5-10 menit, lalu unduh di bagian Artifacts.
+#
+# Memberi tag vX.Y.Z pada commit akan membuat Release berisi semua berkas.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  # ===================================================================== #
+  windows:
+    name: Windows (portable + installer)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Pasang kebutuhan
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Bangun EXE
+        run: pyinstaller KantinKoperasi.spec --noconfirm --clean
+
+      - name: Susun folder portable
+        shell: pwsh
+        run: |
+          $t = "PembukuanKantin-Portable-Windows"
+          New-Item -ItemType Directory -Force -Path "$t/Data" | Out-Null
+          Copy-Item dist/KantinKoperasi.exe $t/
+          Copy-Item PANDUAN.md $t/ -ErrorAction SilentlyContinue
+          Copy-Item contoh $t/contoh -Recurse -ErrorAction SilentlyContinue
+          @"
+          Penanda mode portable.
+
+          Selama berkas ini (atau folder Data) ada di sebelah
+          KantinKoperasi.exe, seluruh data pembukuan disimpan di folder
+          Data, bukan di komputer yang dipakai.
+          "@ | Set-Content "$t/portable.txt" -Encoding UTF8
+          @"
+          PROGRAM PEMBUKUAN KANTIN KOPERASI - VERSI PORTABLE
+          ==================================================
+
+          CARA PAKAI
+            Klik dua kali KantinKoperasi.exe. Tidak perlu dipasang.
+
+          DATA TERSIMPAN DI MANA
+            Di folder Data, di sebelah program ini. Seluruh pembukuan ikut
+            berpindah bila folder ini disalin ke flashdisk atau komputer
+            lain. Komputer yang dipakai tidak ditulisi apa pun.
+
+          PERINGATAN WINDOWS SAAT PERTAMA DIBUKA
+            Bila muncul "Windows protected your PC", klik More info lalu
+            Run anyway. Itu karena program belum bersertifikat digital,
+            bukan karena berisi virus.
+
+          JANGAN LUPA MENCADANGKAN
+            Flashdisk mudah hilang atau rusak. Sesekali salin seluruh
+            folder Data ke komputer atau penyimpanan awan.
+
+          Panduan lengkap ada di berkas PANDUAN.md
+          "@ | Set-Content "$t/BACA SAYA.txt" -Encoding UTF8
+          Compress-Archive -Path $t -DestinationPath "$t.zip" -Force
+
+      - name: Pasang Inno Setup
+        run: choco install innosetup --no-progress -y
+
+      - name: Bangun Installer
+        shell: pwsh
+        run: |
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" installer.iss
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Portable
+          path: PembukuanKantin-Portable-Windows.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Installer
+          path: installer_output/*.exe
+
+  # ===================================================================== #
+  macos:
+    name: macOS (${{ matrix.arsitektur }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-14        # Apple Silicon (M1/M2/M3/M4)
+            arsitektur: AppleSilicon
+          - runner: macos-13        # Intel
+            arsitektur: Intel
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Pasang kebutuhan
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Bangun aplikasi
+        run: pyinstaller KantinKoperasi.spec --noconfirm --clean
+
+      - name: Tanda tangan ad-hoc
+        run: codesign --force --deep --sign - dist/KantinKoperasi.app || true
+
+      - name: Susun folder portable
+        run: |
+          t="PembukuanKantin-Portable-macOS-${{ matrix.arsitektur }}"
+          mkdir -p "$t/Data"
+          cp -R dist/KantinKoperasi.app "$t/"
+          cp -f PANDUAN.md "$t/" || true
+          cp -Rf contoh "$t/contoh" || true
+          cat > "$t/portable.txt" <<'EOF'
+          Penanda mode portable.
+
+          Selama berkas ini (atau folder Data) ada di sebelah
+          KantinKoperasi.app, seluruh data pembukuan disimpan di folder
+          Data, bukan di komputer yang dipakai.
+          EOF
+          cat > "$t/BACA SAYA.txt" <<'EOF'
+          PROGRAM PEMBUKUAN KANTIN KOPERASI - VERSI PORTABLE (macOS)
+          ==========================================================
+
+          CARA MEMBUKA PERTAMA KALI
+            Klik KANAN pada KantinKoperasi.app, pilih Open, lalu tekan
+            Open sekali lagi pada kotak peringatan. Cukup sekali saja;
+            berikutnya bisa dibuka dengan klik dua kali biasa.
+
+            Peringatan itu muncul karena aplikasi belum didaftarkan ke
+            Apple (berbayar), bukan karena berisi virus.
+
+          DATA TERSIMPAN DI MANA
+            Di folder Data, di sebelah aplikasi ini. Seluruh pembukuan
+            ikut berpindah bila folder ini disalin ke flashdisk atau
+            komputer lain.
+
+          JANGAN LUPA MENCADANGKAN
+            Sesekali salin seluruh folder Data ke tempat lain.
+
+          Panduan lengkap ada di berkas PANDUAN.md
+          EOF
+          # Simpan sebagai zip agar izin eksekusi di dalam .app tidak hilang
+          ditto -c -k --sequesterRsrc --keepParent "$t" "$t.zip"
+
+      - name: Buat DMG
+        run: |
+          staging="$(mktemp -d)"
+          cp -R dist/KantinKoperasi.app "$staging/"
+          ln -s /Applications "$staging/Applications"
+          cp -f PANDUAN.md "$staging/" || true
+          hdiutil create -volname "Pembukuan Kantin Koperasi" \
+            -srcfolder "$staging" -ov -format UDZO \
+            "KantinKoperasi-macOS-${{ matrix.arsitektur }}.dmg"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macOS-Portable-${{ matrix.arsitektur }}
+          path: PembukuanKantin-Portable-macOS-${{ matrix.arsitektur }}.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macOS-DMG-${{ matrix.arsitektur }}
+          path: KantinKoperasi-macOS-${{ matrix.arsitektur }}.dmg
+
+  # ===================================================================== #
+  rilis:
+    name: Terbitkan Release
+    needs: [windows, macos]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: berkas
+
+      - name: Buat Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: berkas/**/*
+          generate_release_notes: true
+          body: |
+            ## Program Pembukuan Kantin Koperasi
+
+            | Berkas | Untuk siapa |
+            |--------|-------------|
+            | `PembukuanKantin-Portable-Windows.zip` | Windows — jalan dari flashdisk, tanpa dipasang |
+            | `KantinKoperasi_Setup_*.exe` | Windows — dipasang seperti aplikasi biasa |
+            | `PembukuanKantin-Portable-macOS-AppleSilicon.zip` | Mac M1/M2/M3/M4 — portable |
+            | `PembukuanKantin-Portable-macOS-Intel.zip` | Mac Intel — portable |
+            | `KantinKoperasi-macOS-*.dmg` | Mac — dipasang ke folder Applications |
+
+            **Mac, membuka pertama kali:** klik kanan aplikasi → Open → Open.
+            **Windows, membuka pertama kali:** More info → Run anyway.
+
+            Keduanya muncul karena aplikasi belum bersertifikat digital
+            berbayar, bukan karena berisi virus.
