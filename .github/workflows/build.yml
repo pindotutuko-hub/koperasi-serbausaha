@@ -11,6 +11,11 @@ name: Bangun Aplikasi (Windows + macOS)
 
 on:
   workflow_dispatch:
+    inputs:
+      rilis:
+        description: 'Terbitkan juga sebagai Release dengan tag ini (kosongkan bila hanya ingin Artifacts)'
+        required: false
+        default: ''
   push:
     tags:
       - 'v*'
@@ -95,6 +100,36 @@ jobs:
         with:
           name: Windows-Installer
           path: installer_output/*.exe
+
+      # Tiap job menerbitkan berkasnya sendiri, jadi job yang masih mengantre
+      # (runner macOS Intel sering langka) tidak menahan yang sudah selesai.
+      - name: Terbitkan ke Release
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.rilis != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.rilis || github.ref_name }}
+          name: Program Pembukuan Kantin Koperasi ${{ inputs.rilis || github.ref_name }}
+          files: |
+            PembukuanKantin-Portable-Windows.zip
+            installer_output/*.exe
+          body: |
+            ## Program Pembukuan Kantin Koperasi
+
+            | Berkas | Untuk siapa |
+            |--------|-------------|
+            | `PembukuanKantin-Portable-Windows.zip` | Windows — jalan dari flashdisk, tanpa dipasang |
+            | `KantinKoperasi_Setup_*.exe` | Windows — dipasang seperti aplikasi biasa |
+            | `PembukuanKantin-Portable-macOS-AppleSilicon.zip` | Mac M1/M2/M3/M4 — portable |
+            | `PembukuanKantin-Portable-macOS-Intel.zip` | Mac Intel — portable |
+            | `KantinKoperasi-macOS-*.dmg` | Mac — dipasang ke folder Applications |
+
+            **Mac, membuka pertama kali:** klik kanan aplikasi → Open → Open.
+            **Windows, membuka pertama kali:** More info → Run anyway.
+
+            Keduanya muncul karena aplikasi belum bersertifikat digital
+            berbayar, bukan karena berisi virus.
+
+            Berkas Mac Intel menyusul bila runner-nya sudah tersedia.
 
   # ===================================================================== #
   macos:
@@ -211,35 +246,12 @@ jobs:
           path: KantinKoperasi-macOS-${{ matrix.arsitektur }}.dmg
           if-no-files-found: warn
 
-  # ===================================================================== #
-  rilis:
-    name: Terbitkan Release
-    needs: [windows, macos]
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          path: berkas
-
-      - name: Buat Release
+      - name: Terbitkan ke Release
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.rilis != ''
         uses: softprops/action-gh-release@v2
         with:
-          files: berkas/**/*
-          generate_release_notes: true
-          body: |
-            ## Program Pembukuan Kantin Koperasi
-
-            | Berkas | Untuk siapa |
-            |--------|-------------|
-            | `PembukuanKantin-Portable-Windows.zip` | Windows — jalan dari flashdisk, tanpa dipasang |
-            | `KantinKoperasi_Setup_*.exe` | Windows — dipasang seperti aplikasi biasa |
-            | `PembukuanKantin-Portable-macOS-AppleSilicon.zip` | Mac M1/M2/M3/M4 — portable |
-            | `PembukuanKantin-Portable-macOS-Intel.zip` | Mac Intel — portable |
-            | `KantinKoperasi-macOS-*.dmg` | Mac — dipasang ke folder Applications |
-
-            **Mac, membuka pertama kali:** klik kanan aplikasi → Open → Open.
-            **Windows, membuka pertama kali:** More info → Run anyway.
-
-            Keduanya muncul karena aplikasi belum bersertifikat digital
-            berbayar, bukan karena berisi virus.
+          tag_name: ${{ inputs.rilis || github.ref_name }}
+          name: Program Pembukuan Kantin Koperasi ${{ inputs.rilis || github.ref_name }}
+          files: |
+            PembukuanKantin-Portable-macOS-${{ matrix.arsitektur }}.zip
+            KantinKoperasi-macOS-${{ matrix.arsitektur }}.dmg
