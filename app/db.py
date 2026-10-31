@@ -9,8 +9,8 @@ import sys
 from datetime import datetime
 
 APP_NAME = "KantinKoperasi"
-VERSI_APLIKASI = "2.0.0"
-VERSI_DB = 2
+VERSI_APLIKASI = "2.1.0"
+VERSI_DB = 3
 
 SKEMA = """
 CREATE TABLE IF NOT EXISTS pengaturan (
@@ -413,7 +413,9 @@ def migrasi(kon: sqlite3.Connection) -> None:
         "INSERT INTO log (waktu,aksi,detail) VALUES (?,?,?)",
         (datetime.now().isoformat(timespec="seconds"), "BASIS DATA DIPERBARUI",
          f"Struktur dinaikkan dari versi {versi} ke {VERSI_DB}: "
-         "persediaan perpetual dua jenis, buku kas, dan akun harga pokok penjualan."),
+         "persediaan perpetual dua jenis, buku kas, akun harga pokok penjualan, "
+         "serta akun beban yang masih harus dibayar dan pendapatan yang masih "
+         "harus diterima."),
     )
 
 

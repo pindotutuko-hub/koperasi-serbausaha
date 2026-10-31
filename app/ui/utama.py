@@ -62,10 +62,18 @@ YANG PERLU DIISI PETUGAS HANYA DUA TAB
    menggabungkan seluruh laporan bulanan jadi satu berkas siap dilampirkan ke
    RAT. Buku Kas dan Kartu Persediaan juga punya tombol cetaknya sendiri.
 
-5. JURNAL MANUAL  (tab Jurnal)
-   Untuk pengurus yang paham akuntansi. Dipakai bagi hal yang tidak lewat kas
-   maupun persediaan, misalnya penyusutan peralatan (pilih jenis AJP).
-   Seluruh catatan dari Buku Kas dan Persediaan juga tampil di sini.
+5. JURNAL PENYESUAIAN AKHIR BULAN  (tab Jurnal)
+   Untuk hal yang tidak lewat kas maupun persediaan, dan memang harus
+   ditimbang di akhir bulan. Tersedia empat tombol yang mengisi akunnya
+   sendiri dan langsung menyetel jenis jurnal ke AJP:
+
+       Penyusutan peralatan       Beban Penyusutan / Akum. Penyusutan
+       Beban belum dibayar        Beban ybs / Beban yang Masih Harus Dibayar
+       Pendapatan belum diterima  Pendapatan ybs Masih Harus Diterima / Penjualan
+       Pemakaian perlengkapan     Beban ATK & Perlengkapan / Perlengkapan
+
+   Seluruh catatan dari Buku Kas dan Persediaan juga tampil di tab ini,
+   lengkap dengan keterangan asalnya, sehingga bisa diperiksa pengurus.
 
 6. TUTUP BUKU
    Tab "Tutup Buku" memeriksa kesiapan, lalu mengunci periode dan membuat

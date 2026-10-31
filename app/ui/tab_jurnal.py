@@ -9,12 +9,19 @@ from tkinter import filedialog, ttk
 from .. import db, engine, pdfout, xlsio
 from . import widgets as w
 
+# Transaksi yang lewat kas atau persediaan sekarang dicatat di tab Buku Kas
+# dan tab Persediaan, dan jurnalnya terbentuk sendiri. Tab ini menyisakan
+# hal-hal yang memang harus ditimbang manusia di akhir bulan: penyesuaian.
 TRANSAKSI_CEPAT = [
-    ("Penjualan tunai", "Rekap penjualan kantin", "KAS", "411", "D"),
-    ("Pembelian barang (tunai)", "Pembelian barang dagang", "PEMBELIAN", "KAS", "D"),
-    ("Bayar beban (tunai)", "Pembayaran beban", "611", "KAS", "D"),
-    ("Setor kas ke bank", "Setoran kas ke bank", "BANK", "KAS", "D"),
-    ("Tarik tunai dari bank", "Penarikan tunai dari bank", "KAS", "BANK", "D"),
+    ("Penyusutan peralatan",
+     "Penyusutan peralatan bulan ini", "614", "122", "AJP"),
+    ("Beban belum dibayar",
+     "Beban yang masih harus dibayar", "612", "216", "AJP"),
+    ("Pendapatan belum diterima",
+     "Pendapatan yang masih harus diterima", "118", "411", "AJP"),
+    ("Pemakaian perlengkapan",
+     "Pemakaian perlengkapan kantin", "613", "115", "AJP"),
+    ("Setor kas ke bank", "Setoran kas ke bank", "BANK", "KAS", "JU"),
 ]
 
 
@@ -79,11 +86,12 @@ class DialogJurnal(tk.Toplevel):
         ttk.Label(atas, text="JU = transaksi biasa · AJP = jurnal penyesuaian (mis. penyusutan)",
                   style="Sub.TLabel").grid(row=2, column=0, columnspan=4, sticky="w", pady=(6, 0))
 
-        cepat = ttk.Labelframe(self, text="Transaksi cepat (isi otomatis)", padding=8)
+        cepat = ttk.Labelframe(
+            self, text="Jurnal penyesuaian akhir bulan (isi otomatis)", padding=8)
         cepat.pack(fill="x", padx=14, pady=(4, 6))
-        for i, (label, ket, a, b, _) in enumerate(TRANSAKSI_CEPAT):
+        for i, (label, ket, a, b, jns) in enumerate(TRANSAKSI_CEPAT):
             ttk.Button(cepat, text=label,
-                       command=lambda a=a, b=b, k=ket: self._isi_cepat(a, b, k)
+                       command=lambda a=a, b=b, k=ket, j=jns: self._isi_cepat(a, b, k, j)
                        ).grid(row=0, column=i, padx=3, sticky="w")
 
         tabel = ttk.Labelframe(self, text="Rincian jurnal", padding=8)
@@ -140,12 +148,14 @@ class DialogJurnal(tk.Toplevel):
             d["bingkai"].destroy()
         self.baris_widget.clear()
 
-    def _isi_cepat(self, akun_debit: str, akun_kredit: str, keterangan: str):
+    def _isi_cepat(self, akun_debit: str, akun_kredit: str, keterangan: str,
+                   jenis: str = "JU"):
         def kode(x):
             if x in ("KAS", "BANK", "PEMBELIAN"):
                 a = engine.akun_berperan(x)
                 return a["kode"] if a else ""
             return x
+        self.var_jenis.set(jenis)
         self._kosongkan()
         self._tambah_baris(kode(akun_debit))
         self._tambah_baris(kode(akun_kredit))

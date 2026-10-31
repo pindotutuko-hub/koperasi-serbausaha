@@ -185,6 +185,19 @@ berkas tersebut sebelum membangun EXE.
 ---
 
 ## RIWAYAT PERUBAHAN
+
+**2.1.0**
+- Dua akun baru untuk jurnal penyesuaian akhir bulan: **118 Pendapatan yang
+  Masih Harus Diterima** dan **216 Beban yang Masih Harus Dibayar**, supaya
+  tidak bercampur dengan piutang penjualan seragam (113) maupun utang ke
+  pemasok (211) dan tetap mudah ditelusuri saat rekonsiliasi.
+- Tombol transaksi cepat di tab Jurnal diganti isinya: kini berisi empat
+  jurnal penyesuaian yang memang harus ditimbang manusia tiap akhir bulan
+  (penyusutan peralatan, beban belum dibayar, pendapatan belum diterima,
+  pemakaian perlengkapan) dan otomatis menyetel jenis jurnal ke AJP.
+  Transaksi kas dan pembelian tidak lagi ada di sini karena sudah ditangani
+  tab Buku Kas dan tab Persediaan.
+- Basis data naik ke versi 3, migrasi otomatis seperti sebelumnya.
 **2.0.0**
 - Alur pencatatan dirancang ulang untuk petugas tanpa dasar akuntansi:
   tab **Buku Kas** (uang masuk/keluar dengan pilihan berbahasa awam) dan

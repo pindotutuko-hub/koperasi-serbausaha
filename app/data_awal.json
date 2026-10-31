@@ -270,6 +270,24 @@
       "urut": 45
     },
     {
+      "kode": "118",
+      "nama": "Pendapatan yang Masih Harus Diterima",
+      "kategori": "Aset",
+      "subkategori": "Aktiva Lancar",
+      "saldo_normal": "Debet",
+      "peran": "",
+      "urut": 48
+    },
+    {
+      "kode": "216",
+      "nama": "Beban yang Masih Harus Dibayar",
+      "kategori": "Kewajiban",
+      "subkategori": "Kewajiban",
+      "saldo_normal": "Kredit",
+      "peran": "",
+      "urut": 66
+    },
+    {
       "kode": "521",
       "nama": "Harga Pokok Penjualan Seragam & ATK",
       "kategori": "HPP",

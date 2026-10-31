@@ -1,5 +1,5 @@
 # PANDUAN PEMAKAIAN
-## Program Pembukuan Kantin Koperasi — versi 2.0
+## Program Pembukuan Kantin Koperasi — versi 2.1
 
 Panduan ini ditulis untuk petugas kantin, bukan untuk orang akuntansi.
 Tidak perlu tahu apa itu debit, kredit, atau jurnal. Program yang
@@ -308,7 +308,9 @@ AKHIR BULAN
   1. Periksa buku kas sudah lengkap
   2. Cocokkan sisa stok dengan hitungan fisik;
      bila beda, catat lewat "Penyesuaian stok"
-  3. Catat penyusutan peralatan bila ada     → tab Jurnal, jenis AJP
+  3. Catat jurnal penyesuaian                → tab Jurnal
+     (penyusutan, beban belum dibayar,
+      pendapatan belum diterima)
   4. Lihat laporan keuangan                  → tab Laporan Keuangan
   5. Klik "Cetak Semua (1 PDF)"
   6. Cadangkan data                          → Berkas → Cadangkan Data
@@ -342,6 +344,16 @@ minus bila barang yang ada lebih sedikit dari catatan.
 
 **Barang keluar ditolak karena melebihi stok.**
 Berarti ada pembelian yang belum dicatat. Catat dulu Barang Masuk-nya.
+
+**Ada beban Maret yang tagihannya baru datang April, bagaimana?**
+Itu jurnal penyesuaian. Buka tab **Jurnal** → Transaksi Baru → tekan tombol
+**"Beban belum dibayar"**. Akun dan jenis AJP terisi sendiri, tinggal isi
+tanggal akhir bulan dan jumlahnya. Begitu pula bila ada pendapatan yang
+sudah menjadi hak koperasi tapi uangnya belum diterima — pakai tombol
+**"Pendapatan belum diterima"**.
+
+Keempat tombol penyesuaian itu: penyusutan peralatan, beban belum dibayar,
+pendapatan belum diterima, dan pemakaian perlengkapan.
 
 **Saya salah mencatat bulan lalu yang sudah ditutup.**
 Tab Tutup Buku → **Buka Kembali Periode** → perbaiki → tutup buku lagi.
