@@ -138,11 +138,13 @@ class TabNeracaLajur(ttk.Frame):
         atas = ttk.Frame(self)
         atas.pack(fill="x")
         ttk.Label(atas, text="Neraca Lajur (Worksheet)", style="Judul.TLabel").pack(side="left")
-        ttk.Label(atas, text="  Neraca Saldo → Penyesuaian → Laba Rugi → Neraca",
+        ttk.Label(atas, text="  Neraca Saldo → Penyesuaian → Laba Rugi → Posisi Keuangan",
                   style="Sub.TLabel").pack(side="left")
 
-        opname = ttk.Labelframe(self, text="Persediaan akhir (stock opname)", padding=8)
-        opname.pack(fill="x", pady=(10, 8))
+        self.kotak_opname = ttk.Labelframe(
+            self, text="Persediaan akhir (stock opname)", padding=8)
+        self.kotak_opname.pack(fill="x", pady=(10, 8))
+        opname = self.kotak_opname
         ttk.Label(opname, text="Nilai persediaan barang hasil hitung fisik akhir bulan: Rp"
                   ).pack(side="left")
         self.entry_opname = w.EntriAngka(opname, 18)
@@ -163,7 +165,7 @@ class TabNeracaLajur(ttk.Frame):
             ("ajd", "AJP Debet", 100, "e"), ("ajk", "AJP Kredit", 100, "e"),
             ("dsd", "NSD Debet", 110, "e"), ("dsk", "NSD Kredit", 110, "e"),
             ("lrd", "L/R Debet", 110, "e"), ("lrk", "L/R Kredit", 110, "e"),
-            ("nrd", "Neraca Debet", 110, "e"), ("nrk", "Neraca Kredit", 110, "e")], tinggi=18)
+            ("nrd", "Posisi Keu. Debet", 110, "e"), ("nrk", "Posisi Keu. Kredit", 110, "e")], tinggi=18)
 
         bawah = ttk.Frame(self)
         bawah.pack(fill="x", pady=(8, 0))
@@ -185,6 +187,15 @@ class TabNeracaLajur(ttk.Frame):
         self.lbl_opname.configure(
             text="(sudah diisi)" if nl["opname_diisi"]
             else "(belum diisi — dianggap sama dengan persediaan awal, HPP = pembelian saja)")
+
+        # Pada metode perpetual nilai persediaan selalu mutakhir dari Kartu
+        # Persediaan, jadi stock opname tidak diperlukan. Kotaknya disembunyikan
+        # agar petugas tidak bingung, dan muncul lagi bila membuka periode lama
+        # yang memang memakai metode periodik.
+        if nl.get("metode") == "PERPETUAL":
+            self.kotak_opname.pack_forget()
+        elif not self.kotak_opname.winfo_ismapped():
+            self.kotak_opname.pack(fill="x", pady=(10, 8), before=self.tabel.master)
 
         baris = [[r["kode"], r["nama"], w.rp(r["ns_d"]), w.rp(r["ns_k"]), w.rp(r["adj_d"]),
                   w.rp(r["adj_k"]), w.rp(r["nsd_d"]), w.rp(r["nsd_k"]), w.rp(r["lr_d"]),
@@ -233,7 +244,7 @@ class TabNeracaLajur(ttk.Frame):
 # =========================================================================== #
 class TabLaporan(ttk.Frame):
     LAPORAN = [("Laba Rugi", "laba_rugi"), ("Perubahan Modal", "perubahan_modal"),
-               ("Neraca", "neraca"), ("Arus Kas", "arus_kas"),
+               ("Laporan Posisi Keuangan", "neraca"), ("Arus Kas", "arus_kas"),
                ("Rekap Penjualan Harian", "rekap_penjualan")]
 
     def __init__(self, induk, aplikasi):
@@ -311,13 +322,20 @@ class TabLaporan(ttk.Frame):
             tambah(f"    ({x['nama']})", -x["nilai"])
         tambah("    Total Pendapatan Bersih", None, lr["total_pendapatan"], "total")
         tambah("HARGA POKOK PENJUALAN", gaya="judul")
-        tambah("    Persediaan Barang Dagang (Awal)", lr["persediaan_awal"])
-        tambah("    Pembelian Barang Dagang", lr["pembelian"])
-        tambah("    Beban Angkut Pembelian", lr["angkut"])
-        tambah("    (Retur Pembelian)", -lr["retur_beli"])
-        tambah("    (Potongan Pembelian)", -lr["potongan_beli"])
-        tambah("    Barang Tersedia Dijual", None, lr["barang_tersedia"])
-        tambah("    (Persediaan Barang Dagang Akhir)", -lr["persediaan_akhir"])
+        if lr.get("metode") == "PERPETUAL":
+            # Perpetual: harga pokok terbentuk sendiri saat barang keluar.
+            for x in lr.get("rincian_hpp", []):
+                tambah("    " + x["nama"], x["nilai"])
+            if not lr.get("rincian_hpp"):
+                tambah("    Belum ada barang keluar pada periode ini", 0)
+        else:
+            tambah("    Persediaan Barang Dagang (Awal)", lr["persediaan_awal"])
+            tambah("    Pembelian Barang Dagang", lr["pembelian"])
+            tambah("    Beban Angkut Pembelian", lr["angkut"])
+            tambah("    (Retur Pembelian)", -lr["retur_beli"])
+            tambah("    (Potongan Pembelian)", -lr["potongan_beli"])
+            tambah("    Barang Tersedia Dijual", None, lr["barang_tersedia"])
+            tambah("    (Persediaan Barang Dagang Akhir)", -lr["persediaan_akhir"])
         tambah("    Total Harga Pokok Penjualan", None, lr["hpp"], "total")
         tambah("LABA KOTOR", None, lr["laba_kotor"], "total")
         tambah("BEBAN OPERASIONAL", gaya="judul")

@@ -10,7 +10,7 @@ Menggantikan pembukuan Excel dengan program yang lebih aman dari salah rumus,
 lengkap dengan cetak PDF sekali klik dan proses tutup buku bulanan.
 Bebas dipakai dan disesuaikan oleh koperasi mana pun.
 
-Versi 1.0.1 · Windows & macOS · tersedia versi portable · tanpa internet
+Versi 2.0 · Windows & macOS · tersedia versi portable · tanpa internet
 
 </div>
 
@@ -95,6 +95,45 @@ serta bendahara.
   membentuk saldo awal bulan berikutnya secara otomatis
 - Fasilitas buka kembali periode bila ada koreksi
 - Pencadangan manual dan otomatis setiap program ditutup
+
+---
+
+## Dirancang untuk petugas tanpa dasar akuntansi
+
+Petugas hanya mengisi **dua tab**. Istilah debit dan kredit tidak pernah muncul.
+
+```
+  Tab BUKU KAS          Tab PERSEDIAAN
+  uang masuk/keluar     barang datang/terjual
+         │                     │
+         └──────────┬──────────┘
+                    ▼
+     program menyusun sendiri: jurnal → buku besar →
+     neraca lajur → laba rugi, perubahan modal,
+     laporan posisi keuangan, arus kas
+```
+
+Pada **Buku Kas**, petugas memilih "Untuk apa?" dari daftar berbahasa
+sehari-hari ("Uang hasil penjualan", "Bayar gaji penjaga"), bukan memilih
+akun. Pada **Persediaan**, barang keluar cukup diisi jumlah unitnya —
+harga pokoknya dihitung sendiri oleh program.
+
+---
+
+## Persediaan perpetual, dua jenis barang
+
+Persediaan dicatat **perpetual** dengan **harga pokok rata-rata bergerak**:
+setiap barang masuk dengan harga berbeda, rata-ratanya dihitung ulang;
+setiap barang keluar, harga pokoknya terbentuk sendiri dan langsung masuk
+ke Laporan Laba Rugi. Tidak perlu stock opname bulanan.
+
+Dua jenis bawaan: **Seragam & ATK** dan **Makanan & Minuman**, masing-masing
+punya akun persediaan, akun harga pokok, dan akun penjualan sendiri.
+
+```
+Uang hasil penjualan  −  Harga pokok barang terjual  =  Laba kotor
+Laba kotor            −  Beban (gaji, listrik, dsb)  =  SHU
+```
 
 ---
 

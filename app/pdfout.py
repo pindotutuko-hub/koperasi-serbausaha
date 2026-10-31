@@ -336,7 +336,7 @@ def cetak_neraca_lajur(periode_id: int, path: str | None = None) -> str:
                f"{rp(nl['persediaan_akhir'])} "
                f"({'hasil stock opname' if nl['opname_diisi'] else 'belum diisi — dianggap sama dengan saldo awal'}). "
                "Metode persediaan fisik/periodik: persediaan awal masuk kolom Laba/Rugi, "
-               "persediaan akhir tampil di kolom Neraca.")
+               "persediaan akhir tampil di kolom Posisi Keuangan.")
     isi += [Spacer(1, 6), Paragraph(catatan, S_CATATAN)]
     dok.build(isi, onFirstPage=_kaki, onLaterPages=_kaki)
     return path
@@ -368,15 +368,23 @@ def cetak_laba_rugi(periode_id: int, path: str | None = None) -> str:
         tambah(f"   ({x['nama']})", -x["nilai"])
     tambah("   Total Pendapatan Bersih", None, lr["total_pendapatan"], tebal=True)
     tambah("HARGA POKOK PENJUALAN", judul=True)
-    tambah("   Persediaan Barang Dagang (Awal)", lr["persediaan_awal"])
-    tambah("   Pembelian Barang Dagang", lr["pembelian"])
-    tambah("   Beban Angkut Pembelian", lr["angkut"])
-    if lr["hpp_lain"]:
-        tambah("   Biaya Pokok Lainnya", lr["hpp_lain"])
-    tambah("   (Retur Pembelian)", -lr["retur_beli"])
-    tambah("   (Potongan Pembelian)", -lr["potongan_beli"])
-    tambah("   Barang Tersedia Dijual", None, lr["barang_tersedia"])
-    tambah("   (Persediaan Barang Dagang Akhir)", -lr["persediaan_akhir"])
+    if lr.get("metode") == "PERPETUAL":
+        # Perpetual: harga pokok sudah terbentuk sendiri setiap barang keluar,
+        # jadi cukup dirinci per jenis barang.
+        for x in lr.get("rincian_hpp", []):
+            tambah(f"   {x['nama']}", x["nilai"])
+        if not lr.get("rincian_hpp"):
+            tambah("   Belum ada barang keluar pada periode ini", 0)
+    else:
+        tambah("   Persediaan Barang Dagang (Awal)", lr["persediaan_awal"])
+        tambah("   Pembelian Barang Dagang", lr["pembelian"])
+        tambah("   Beban Angkut Pembelian", lr["angkut"])
+        if lr["hpp_lain"]:
+            tambah("   Biaya Pokok Lainnya", lr["hpp_lain"])
+        tambah("   (Retur Pembelian)", -lr["retur_beli"])
+        tambah("   (Potongan Pembelian)", -lr["potongan_beli"])
+        tambah("   Barang Tersedia Dijual", None, lr["barang_tersedia"])
+        tambah("   (Persediaan Barang Dagang Akhir)", -lr["persediaan_akhir"])
     tambah("   Total Harga Pokok Penjualan", None, lr["hpp"], tebal=True)
     tambah("LABA KOTOR", None, lr["laba_kotor"], tebal=True)
     tambah("BEBAN OPERASIONAL", judul=True)
@@ -394,7 +402,13 @@ def cetak_laba_rugi(periode_id: int, path: str | None = None) -> str:
            ("FONTSIZE", (0, len(data) - 1), (-1, len(data) - 1), 9)]
     t.setStyle(TableStyle(gy))
     isi.append(t)
-    if not lr["opname_diisi"]:
+    if lr.get("metode") == "PERPETUAL":
+        isi += [Spacer(1, 6),
+                Paragraph("Persediaan dicatat secara perpetual. Harga pokok penjualan di atas "
+                          "terbentuk sendiri setiap barang keluar, dihitung dengan metode "
+                          "rata-rata bergerak; rinciannya dapat dilihat pada Kartu Persediaan.",
+                          S_CATATAN)]
+    elif not lr["opname_diisi"]:
         isi += [Spacer(1, 6),
                 Paragraph("Catatan: persediaan akhir belum diisi (stock opname), sehingga HPP "
                           "belum memperhitungkan barang terjual. Isi di menu Neraca Lajur / "
@@ -432,9 +446,9 @@ def cetak_perubahan_modal(periode_id: int, path: str | None = None) -> str:
 def cetak_neraca(periode_id: int, path: str | None = None) -> str:
     n = engine.neraca(periode_id)
     p = n["periode"]
-    path = path or nama_berkas("Neraca", p)
-    dok, lebar = _dokumen(path, "Neraca")
-    isi = _kop("LAPORAN POSISI KEUANGAN (NERACA)", f"Per {_akhir_bulan_teks(p)}", lebar)
+    path = path or nama_berkas("Laporan_Posisi_Keuangan", p)
+    dok, lebar = _dokumen(path, "Laporan Posisi Keuangan")
+    isi = _kop("LAPORAN POSISI KEUANGAN", f"Per {_akhir_bulan_teks(p)}", lebar)
 
     kiri = [("AKTIVA", None, "judul"), ("Aktiva Lancar", None, "sub")]
     for a in n["aktiva_lancar"]:
@@ -637,4 +651,97 @@ def cetak_paket_lengkap(periode_id: int, path: str | None = None) -> str:
             path = path_bebas(path)
             with open(path, "wb") as f:
                 penulis.write(f)
+    return path
+
+
+# --------------------------------------------------------------------------- #
+# Buku Kas dan Persediaan
+# --------------------------------------------------------------------------- #
+def cetak_buku_kas(periode_id: int, path: str | None = None) -> str:
+    from . import kasbuku
+
+    bk = kasbuku.daftar_kas(periode_id)
+    p = engine.periode(periode_id)
+    path = path or nama_berkas("Buku_Kas", p)
+    dok, lebar = _dokumen(path, "Buku Kas", mendatar=True)
+    isi = _kop("BUKU KAS",
+               f"Periode {engine.nama_periode(p['tahun'], p['bulan'])}", lebar)
+
+    data = [["Tanggal", "No Bukti", "Keterangan", "Untuk Apa",
+             "Uang Masuk", "Uang Keluar", "Sisa Kas"]]
+    data.append(["", "", "Saldo awal periode", "", "", "", rp(bk["saldo_awal"])])
+    for b in bk["baris"]:
+        data.append([
+            tgl_id(b["tanggal"]), b["no_bukti"], b["keterangan"], b["lawan"],
+            rp(b["jumlah"]) if b["arah"] == "MASUK" else "",
+            rp(b["jumlah"]) if b["arah"] == "KELUAR" else "",
+            rp(b["saldo"]),
+        ])
+    data.append(["", "", "JUMLAH", "", rp(bk["total_masuk"]),
+                 rp(bk["total_keluar"]), rp(bk["saldo_akhir"])])
+
+    lk = [lebar * x for x in (0.09, 0.09, 0.30, 0.19, 0.11, 0.11, 0.11)]
+    isi.append(_tabel(data, lk,
+                      rata={0: "CENTER", 1: "CENTER", 4: "RIGHT", 5: "RIGHT", 6: "RIGHT"},
+                      total_baris=[len(data) - 1]))
+    isi += [Spacer(1, 16), _tanda_tangan(lebar, _akhir_bulan_teks(p))]
+    dok.build(isi, onFirstPage=_kaki, onLaterPages=_kaki)
+    return path
+
+
+def cetak_persediaan(periode_id: int, path: str | None = None) -> str:
+    from . import kasbuku
+
+    rk = kasbuku.rekap_persediaan(periode_id)
+    p = engine.periode(periode_id)
+    path = path or nama_berkas("Kartu_Persediaan", p)
+    dok, lebar = _dokumen(path, "Kartu Persediaan", mendatar=True)
+    isi = _kop("KARTU PERSEDIAAN (PERPETUAL)",
+               f"Periode {engine.nama_periode(p['tahun'], p['bulan'])}", lebar)
+
+    for k in rk["kartu"]:
+        j = k["jenis"]
+        isi.append(Paragraph(f"<b>{j['nama']}</b>  (satuan: {j['satuan']})", S_SUB))
+        isi.append(Spacer(1, 4))
+
+        data = [["Tanggal", "Keterangan", "Mutasi", "Unit", "Harga/Unit",
+                 "Nilai", "Sisa Unit", "Sisa Nilai"]]
+        data.append(["", "Saldo awal", "", f"{k['awal_jumlah']:,.0f}", "", "",
+                     f"{k['awal_jumlah']:,.0f}", rp(k["awal_nilai"])])
+        for m in k["baris"]:
+            arah = {"MASUK": "Masuk", "KELUAR": "Keluar",
+                    "PENYESUAIAN": "Penyesuaian"}[m["arah"]]
+            data.append([
+                tgl_id(m["tanggal"]), m["keterangan"], arah,
+                f"{m['jumlah']:,.0f}", rp(m["harga"]), rp(m["nilai"]),
+                f"{m['sisa_jumlah']:,.0f}", rp(m["sisa_nilai"]),
+            ])
+        data.append(["", "SALDO AKHIR", "", f"{k['akhir_jumlah']:,.0f}", "",
+                     "", f"{k['akhir_jumlah']:,.0f}", rp(k["akhir_nilai"])])
+
+        lk = [lebar * x for x in (0.09, 0.28, 0.10, 0.08, 0.11, 0.12, 0.09, 0.13)]
+        isi.append(_tabel(data, lk,
+                          rata={0: "CENTER", 2: "CENTER", 3: "RIGHT", 4: "RIGHT",
+                                5: "RIGHT", 6: "RIGHT", 7: "RIGHT"},
+                          total_baris=[len(data) - 1], padat=True))
+        isi.append(Spacer(1, 12))
+
+    ringkas = [["Jenis Persediaan", "Saldo Awal", "Barang Masuk",
+                "Barang Keluar (Harga Pokok)", "Saldo Akhir"]]
+    for k in rk["kartu"]:
+        ringkas.append([k["jenis"]["nama"], rp(k["awal_nilai"]), rp(k["masuk_nilai"]),
+                        rp(k["keluar_nilai"]), rp(k["akhir_nilai"])])
+    ringkas.append(["TOTAL", rp(rk["total_awal"]), rp(rk["total_masuk"]),
+                    rp(rk["total_keluar"]), rp(rk["total_akhir"])])
+    lk = [lebar * x for x in (0.28, 0.18, 0.18, 0.18, 0.18)]
+    isi.append(Paragraph("<b>Ringkasan</b>", S_SUB))
+    isi.append(Spacer(1, 4))
+    isi.append(_tabel(ringkas, lk, rata={1: "RIGHT", 2: "RIGHT", 3: "RIGHT", 4: "RIGHT"},
+                      total_baris=[len(ringkas) - 1]))
+    isi += [Spacer(1, 8),
+            Paragraph("Harga pokok barang keluar dihitung dengan metode rata-rata "
+                      "bergerak, dan jumlahnya menjadi Harga Pokok Penjualan pada "
+                      "Laporan Laba Rugi.", S_CATATAN),
+            Spacer(1, 14), _tanda_tangan(lebar, _akhir_bulan_teks(p))]
+    dok.build(isi, onFirstPage=_kaki, onLaterPages=_kaki)
     return path

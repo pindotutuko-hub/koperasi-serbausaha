@@ -1,12 +1,11 @@
 {
   "_catatan": [
-    "Berkas ini memuat bagan akun (COA) bawaan untuk unit usaha kantin/toko.",
-    "Saldo awal dan jurnal sengaja dikosongkan agar repositori ini tidak",
-    "memuat angka pembukuan milik koperasi mana pun.",
+    "Bagan akun (COA) bawaan untuk unit usaha kantin/toko koperasi.",
+    "Persediaan dicatat secara PERPETUAL: pembelian menambah akun Persediaan,",
+    "dan harga pokok penjualan terbentuk otomatis setiap barang keluar.",
     "",
-    "Saat program pertama kali dijalankan, isi saldo awal lewat tab",
-    "'Saldo Awal', lalu mulai mencatat transaksi di tab 'Jurnal Transaksi'",
-    "atau impor dari Excel memakai template yang disediakan program."
+    "Saldo awal dan jurnal sengaja dikosongkan agar berkas ini tidak memuat",
+    "angka pembukuan koperasi mana pun. Isi lewat program pada pemakaian pertama."
   ],
   "akun": [
     {
@@ -38,12 +37,13 @@
     },
     {
       "kode": "114",
-      "nama": "Persediaan Barang Toko",
+      "nama": "Persediaan Barang Toko (saldo lama)",
       "kategori": "Aset",
       "subkategori": "Aktiva Lancar",
       "saldo_normal": "Debet",
-      "peran": "PERSEDIAAN",
-      "urut": 4
+      "peran": "",
+      "urut": 4,
+      "aktif": 0
     },
     {
       "kode": "115",
@@ -160,7 +160,9 @@
       "subkategori": "HPP",
       "saldo_normal": "Debet",
       "peran": "PEMBELIAN",
-      "urut": 17
+      "urut": 17,
+      "aktif": 0,
+      "catatan": "Tidak dipakai lagi sejak beralih ke persediaan perpetual."
     },
     {
       "kode": "512",
@@ -169,7 +171,9 @@
       "subkategori": "HPP",
       "saldo_normal": "Debet",
       "peran": "ANGKUT_BELI",
-      "urut": 18
+      "urut": 18,
+      "aktif": 0,
+      "catatan": "Tidak dipakai lagi sejak beralih ke persediaan perpetual."
     },
     {
       "kode": "513",
@@ -178,7 +182,9 @@
       "subkategori": "HPP",
       "saldo_normal": "Kredit",
       "peran": "RETUR_BELI",
-      "urut": 19
+      "urut": 19,
+      "aktif": 0,
+      "catatan": "Tidak dipakai lagi sejak beralih ke persediaan perpetual."
     },
     {
       "kode": "514",
@@ -187,7 +193,9 @@
       "subkategori": "HPP",
       "saldo_normal": "Kredit",
       "peran": "POTONGAN_BELI",
-      "urut": 20
+      "urut": 20,
+      "aktif": 0,
+      "catatan": "Tidak dipakai lagi sejak beralih ke persediaan perpetual."
     },
     {
       "kode": "611",
@@ -242,8 +250,71 @@
       "saldo_normal": "Debet",
       "peran": "",
       "urut": 26
+    },
+    {
+      "kode": "1141",
+      "nama": "Persediaan Seragam & ATK",
+      "kategori": "Aset",
+      "subkategori": "Aktiva Lancar",
+      "saldo_normal": "Debet",
+      "peran": "PERSEDIAAN",
+      "urut": 44
+    },
+    {
+      "kode": "1142",
+      "nama": "Persediaan Makanan & Minuman",
+      "kategori": "Aset",
+      "subkategori": "Aktiva Lancar",
+      "saldo_normal": "Debet",
+      "peran": "PERSEDIAAN",
+      "urut": 45
+    },
+    {
+      "kode": "521",
+      "nama": "Harga Pokok Penjualan Seragam & ATK",
+      "kategori": "HPP",
+      "subkategori": "Harga Pokok Penjualan",
+      "saldo_normal": "Debet",
+      "peran": "HPP",
+      "urut": 170
+    },
+    {
+      "kode": "522",
+      "nama": "Harga Pokok Penjualan Makanan & Minuman",
+      "kategori": "HPP",
+      "subkategori": "Harga Pokok Penjualan",
+      "saldo_normal": "Debet",
+      "peran": "HPP",
+      "urut": 171
+    },
+    {
+      "kode": "523",
+      "nama": "Selisih Persediaan (rusak/hilang)",
+      "kategori": "HPP",
+      "subkategori": "Harga Pokok Penjualan",
+      "saldo_normal": "Debet",
+      "peran": "SELISIH_PERSEDIAAN",
+      "urut": 172
     }
   ],
   "saldo_awal": [],
-  "jurnal": {}
+  "jurnal": {},
+  "jenis_persediaan": [
+    {
+      "nama": "Seragam & ATK",
+      "satuan": "potong",
+      "kode_akun": "1141",
+      "kode_hpp": "521",
+      "kode_jual": "412",
+      "urut": 1
+    },
+    {
+      "nama": "Makanan & Minuman",
+      "satuan": "item",
+      "kode_akun": "1142",
+      "kode_hpp": "522",
+      "kode_jual": "411",
+      "urut": 2
+    }
+  ]
 }

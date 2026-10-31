@@ -1,8 +1,17 @@
 # PANDUAN PEMAKAIAN
-## Program Pembukuan Kantin Koperasi — versi 1.0.0
+## Program Pembukuan Kantin Koperasi — versi 2.0
 
-Panduan ini ditulis untuk pengurus koperasi, bukan untuk programmer.
-Tidak perlu paham komputer secara mendalam untuk memakainya.
+Panduan ini ditulis untuk petugas kantin, bukan untuk orang akuntansi.
+Tidak perlu tahu apa itu debit, kredit, atau jurnal. Program yang
+mengurus semua itu sendiri.
+
+**Yang perlu Anda lakukan hanya dua hal:**
+
+> 1. Catat **uang** yang masuk dan keluar → tab **Buku Kas**
+> 2. Catat **barang** yang datang dan terjual → tab **Persediaan**
+
+Dari dua catatan itu, program menyusun sendiri jurnal, buku besar, neraca
+lajur, sampai laporan keuangan lengkap yang tinggal dicetak.
 
 ---
 
@@ -11,412 +20,347 @@ Tidak perlu paham komputer secara mendalam untuk memakainya.
 1. [Memasang program](#1-memasang-program)
 2. [Mengenal tampilan](#2-mengenal-tampilan)
 3. [Persiapan awal (sekali saja)](#3-persiapan-awal-sekali-saja)
-4. [Memasukkan transaksi harian](#4-memasukkan-transaksi-harian)
-5. [Mengimpor jurnal dari Excel](#5-mengimpor-jurnal-dari-excel)
-6. [Melihat dan mencetak laporan](#6-melihat-dan-mencetak-laporan)
-7. [Stock opname dan HPP](#7-stock-opname-dan-hpp)
+4. [Mencatat uang masuk dan keluar](#4-mencatat-uang-masuk-dan-keluar)
+5. [Mencatat barang masuk dan terjual](#5-mencatat-barang-masuk-dan-terjual)
+6. [Penjualan yang dibayar menyusul](#6-penjualan-yang-dibayar-menyusul)
+7. [Melihat dan mencetak laporan](#7-melihat-dan-mencetak-laporan)
 8. [Tutup buku ke bulan berikutnya](#8-tutup-buku-ke-bulan-berikutnya)
-9. [Mencadangkan dan memulihkan data](#9-mencadangkan-dan-memulihkan-data)
-10. [Alur kerja bulanan (ringkas)](#10-alur-kerja-bulanan-ringkas)
-11. [Contoh jurnal transaksi kantin](#11-contoh-jurnal-transaksi-kantin)
-12. [Tanya jawab dan mengatasi masalah](#12-tanya-jawab-dan-mengatasi-masalah)
+9. [Mencadangkan data](#9-mencadangkan-data)
+10. [Alur kerja bulanan](#10-alur-kerja-bulanan)
+11. [Tanya jawab](#11-tanya-jawab)
 
 ---
 
 ## 1. MEMASANG PROGRAM
 
-Ada tiga cara. Pilih salah satu yang paling sesuai.
+### Windows
 
-### Cara A — memakai installer Windows (disarankan untuk komputer tetap)
+**Cara A — installer.** Klik dua kali `KantinKoperasi_Setup_2.0.0.exe`, ikuti
+sampai selesai. Bila muncul peringatan biru "Windows protected your PC", klik
+**More info** → **Run anyway**.
 
-1. Klik dua kali `KantinKoperasi_Setup_1.0.0.exe`.
-2. Bila Windows menampilkan peringatan biru **"Windows protected your PC"**,
-   klik **More info** → **Run anyway**. Peringatan ini muncul karena program
-   belum membeli sertifikat digital, bukan karena berisi virus.
-3. Ikuti langkahnya sampai selesai (cukup klik **Next** terus).
-4. Ikon **Pembukuan Kantin** akan muncul di Desktop.
+**Cara B — portable (flashdisk).** Salin folder `PembukuanKantin-Portable`
+ke flashdisk, klik dua kali `KantinKoperasi.exe`. Seluruh data ikut di dalam
+folder itu, jadi bisa dibawa ke komputer mana pun.
 
-### Cara B — versi portable (flashdisk)
+### Mac
 
-Salin seluruh folder `PembukuanKantin-Portable` ke flashdisk, lalu klik dua
-kali `KantinKoperasi.exe`. Tidak ada proses pemasangan sama sekali.
+Buka berkas `.dmg`, seret ikonnya ke folder Applications. **Pembukaan
+pertama:** klik **kanan** ikon aplikasi → **Open** → tekan **Open** lagi.
+Cukup sekali.
 
-Keunggulannya: **seluruh data ikut di dalam folder itu**. Flashdisk bisa
-dibawa ke komputer mana pun dan pembukuan tetap lanjut dari posisi terakhir.
-Komputer yang dipinjam tidak ditulisi apa pun.
+Peringatan pada Windows maupun Mac muncul karena aplikasi belum
+bersertifikat digital berbayar, bukan karena berisi virus.
 
-### Cara C — di komputer Mac
+### Di mana data saya tersimpan?
 
-Buka berkas `.dmg`, seret ikon aplikasi ke folder Applications. Atau, untuk
-versi portable, salin seluruh folder portable ke tempat yang dikehendaki.
+Lihat menu **Berkas → Lokasi Data**. Baris pertama memberi tahu modenya:
 
-**Pembukaan pertama di Mac:** klik **kanan** ikon aplikasi → pilih **Open** →
-tekan **Open** sekali lagi pada kotak peringatan. Cukup sekali; berikutnya
-bisa dibuka dengan klik dua kali biasa. Peringatan itu muncul karena aplikasi
-belum didaftarkan ke Apple, bukan karena berisi virus.
-
-### Di mana data saya disimpan?
-
-Tergantung mode yang dipakai. Lihat lewat menu **Berkas → Lokasi Data** —
-mode yang sedang aktif tertulis di baris pertama.
-
-**Mode portable** — data ada di folder `Data` di sebelah aplikasi:
-
-```
-PembukuanKantin-Portable\Data\
-```
-
-**Mode terpasang** — data ada di folder pengguna komputer:
-
-```
-Windows : C:\Users\<nama-pengguna>\AppData\Local\KantinKoperasi\
-macOS   : ~/Library/Application Support/KantinKoperasi/
-```
-
-Isinya sama: `kantin.db` (basis data), folder `backup` (cadangan otomatis),
-dan folder `Laporan` (hasil cetak PDF/Excel).
-
-Pada mode terpasang, **data tidak ikut terhapus** walaupun program dihapus
-atau diperbarui.
-
-### Berpindah antar mode
-
-Berkas programnya sama persis; yang menentukan hanya ada-tidaknya penanda.
-
-- **Jadikan portable:** buat folder bernama `Data` di sebelah aplikasi.
-- **Kembali ke terpasang:** hapus folder `Data` dan berkas `portable.txt`.
-
-Memindahkan pembukuan yang sudah berjalan ke mode portable: buat folder
-`Data`, lalu salin berkas `kantin.db` dari folder lama ke dalamnya.
+- **PORTABLE** — data ada di folder `Data` di sebelah aplikasi, ikut
+  berpindah bila foldernya disalin.
+- **TERPASANG** — data ada di folder pengguna komputer, tetap aman walaupun
+  program dihapus atau diperbarui.
 
 ---
 
 ## 2. MENGENAL TAMPILAN
 
-Di bagian atas jendela terdapat **pemilih periode** (misalnya "Januari 2026").
-Semua yang ditampilkan di layar mengikuti periode yang sedang dipilih.
+Di bagian atas ada **pemilih periode** (misalnya "Maret 2026"). Semua yang
+tampil mengikuti bulan yang sedang dipilih.
 
-Program terdiri dari 8 tab:
+| Tab | Isinya | Siapa yang pakai |
+|-----|--------|------------------|
+| **Beranda** | Ringkasan: sisa kas, persediaan, SHU | semua |
+| **Buku Kas** | Uang masuk dan keluar | **petugas** |
+| **Persediaan** | Barang datang dan terjual | **petugas** |
+| Jurnal | Hasil olahan otomatis, bisa diperiksa | pengurus |
+| Buku Besar | Mutasi tiap akun | pengurus |
+| Neraca Lajur | Kertas kerja 12 kolom | pengurus |
+| Laporan Keuangan | Laba Rugi, Perubahan Modal, Posisi Keuangan, Arus Kas | pengurus |
+| Daftar Akun | Daftar kode akun | pengurus |
+| Saldo Awal | Saldo pembuka | pengurus |
+| Tutup Buku | Mengunci bulan, pindah ke bulan berikutnya | pengurus |
 
-| Tab | Fungsi |
-|-----|--------|
-| **Beranda** | Ringkasan cepat: kas, bank, persediaan, penjualan, SHU, total aktiva |
-| **Jurnal Transaksi** | Memasukkan, mengubah, menghapus, dan mengimpor transaksi |
-| **Buku Besar** | Mutasi per akun, atau rekap saldo seluruh akun |
-| **Neraca Lajur** | Kertas kerja 12 kolom + tempat mengisi stock opname |
-| **Laporan Keuangan** | Laba Rugi, Perubahan Modal, Neraca, Arus Kas, Rekap Penjualan |
-| **Daftar Akun** | Daftar kode akun (COA) — bisa ditambah/diubah |
-| **Saldo Awal** | Saldo pembuka periode pertama |
-| **Tutup Buku** | Mengunci bulan berjalan dan membuka bulan berikutnya |
-
-Tombol yang sering dipakai selalu berada di bagian atas tiap tab.
+**Petugas sehari-hari cukup memakai dua tab saja:** Buku Kas dan Persediaan.
 
 ---
 
 ## 3. PERSIAPAN AWAL (SEKALI SAJA)
 
-Program dibuka dengan **26 akun** siap pakai untuk usaha kantin/toko, tanpa
-angka apa pun. Tiga hal berikut diisi sekali di awal:
+1. **Berkas → Pengaturan** — isi nama koperasi, unit usaha, kota, nama ketua
+   dan bendahara. Data ini tercetak di kop dan kolom tanda tangan setiap
+   laporan.
+2. **Tab Saldo Awal** — isi saldo pembuka: uang kas, saldo bank, piutang,
+   peralatan, utang, simpanan anggota, dan modal. Indikator di bawah tabel
+   harus bertuliskan **SEIMBANG** sebelum bisa disimpan.
+3. **Tab Persediaan** — catat stok barang yang ada sekarang lewat tombol
+   **Barang Masuk**: berapa unit dan berapa harga belinya.
 
-1. **Menu Berkas → Pengaturan** — isi nama koperasi, unit usaha, alamat, kota,
-   nama ketua, dan nama bendahara. Data ini yang tercetak di kop dan kolom
-   tanda tangan setiap laporan PDF.
-2. **Tab Daftar Akun** — periksa apakah ada akun yang perlu ditambah, misalnya
-   akun beban baru. Tekan **Tambah Akun**.
-3. **Tab Saldo Awal** — isi saldo pembuka koperasi per tanggal mulai
-   pembukuan: kas, bank, piutang, persediaan, peralatan, utang, simpanan
-   anggota, modal, dan laba ditahan. Indikator di bawah tabel harus
-   bertuliskan **SEIMBANG** sebelum bisa disimpan.
-
-   Belum tahu angkanya? Ambil dari neraca pembukuan sebelumnya, atau hitung
-   fisik: uang kas, saldo rekening, nilai barang di kantin, dan peralatan.
-
-> Saldo awal otomatis terkunci bila periode sebelumnya sudah ditutup buku,
-> karena angkanya diambil dari hasil tutup buku, bukan diketik manual.
+Setelah itu program siap dipakai sehari-hari.
 
 ---
 
-## 4. MEMASUKKAN TRANSAKSI HARIAN
+## 4. MENCATAT UANG MASUK DAN KELUAR
 
-1. Buka tab **Jurnal Transaksi** → klik **Transaksi Baru**.
-2. Isi **Tanggal** (klik ikon kalender bila perlu).
-3. **No Bukti** terisi otomatis, tapi boleh diganti sesuai nomor bukti fisik.
-4. **Jenis**: pilih `JU` untuk transaksi biasa, `AJP` untuk jurnal penyesuaian
-   (penyusutan, pemakaian perlengkapan, dan sejenisnya).
-5. Isi **Keterangan** singkat namun jelas.
-6. Pada tabel rincian, pilih akun lalu isi kolom **Debit** ATAU **Kredit**
-   (jangan keduanya pada baris yang sama). Klik **+ Baris** bila butuh baris
-   tambahan.
-7. Perhatikan indikator di bawah tabel. Tombol simpan baru aktif bila sudah
-   tertulis **BALANCE** (total debit = total kredit).
-8. Klik **Simpan**, atau **Simpan & Input Lagi** untuk langsung mengisi
-   transaksi berikutnya.
+Buka tab **Buku Kas**. Ada dua tombol besar.
 
-### Tombol Transaksi Cepat
+### Uang masuk (tombol hijau)
 
-Di dalam dialog terdapat 5 tombol pintasan yang langsung mengisikan pasangan
-akun yang benar, tinggal ketik nominalnya:
+Dipakai setiap ada uang diterima. Isi empat hal:
 
-- **Penjualan Tunai** — Kas (D) / Penjualan Kantin (K)
-- **Pembelian Tunai** — Pembelian (D) / Kas (K)
-- **Bayar Beban** — Beban (D) / Kas (K)
-- **Setor ke Bank** — Bank (D) / Kas (K)
-- **Terima Piutang** — Kas (D) / Piutang (K)
+| Isian | Contoh |
+|-------|--------|
+| Tanggal | 05/03/2026 |
+| Untuk apa? | pilih **Penjualan Kantin — Uang hasil penjualan** |
+| Keterangan | Rekap penjualan 5 Maret |
+| Jumlah uang | 485.000 |
+
+Klik **Simpan**. Selesai.
+
+### Uang keluar (tombol merah)
+
+Dipakai setiap ada uang dikeluarkan:
+
+| Isian | Contoh |
+|-------|--------|
+| Tanggal | 15/03/2026 |
+| Untuk apa? | pilih **Beban Gaji / Honor — Pengeluaran rutin kantin** |
+| Keterangan | Gaji penjaga kantin bulan Maret |
+| Jumlah uang | 1.200.000 |
+
+### Daftar "Untuk apa?"
+
+Setiap pilihan sudah diberi penjelasan singkat, jadi tinggal dibaca:
+
+| Pilih ini | Kalau kejadiannya |
+|-----------|-------------------|
+| Penjualan Kantin | Uang hasil jualan makanan dan minuman |
+| Penjualan Seragam & ATK | Uang hasil jualan seragam atau alat tulis |
+| Piutang | Pelanggan melunasi utangnya |
+| Bank | Setor uang ke bank, atau tarik tunai |
+| Beban Gaji / Honor | Bayar gaji penjaga |
+| Beban Listrik & Air | Bayar listrik atau air |
+| Utang Usaha | Membayar utang ke pemasok |
+| Simpanan Wajib / Pokok | Terima setoran anggota |
+| Peralatan | Beli barang tahan lama, misalnya kulkas atau etalase |
+
+> **Pembelian barang dagangan tidak dicatat di sini.** Catat di tab
+> Persediaan, nanti buku kas terisi sendiri.
 
 ### Mengubah atau menghapus
 
-Klik dua kali baris transaksi untuk mengubah, atau pilih baris lalu tekan
-tombol **Hapus**. Transaksi pada periode yang sudah ditutup buku tidak bisa
-diubah — buka kembali periodenya terlebih dahulu (lihat bagian 8).
+Klik dua kali barisnya untuk mengubah, atau pilih baris lalu tekan **Hapus**.
 
 ---
 
-## 5. MENGIMPOR JURNAL DARI EXCEL
+## 5. MENCATAT BARANG MASUK DAN TERJUAL
 
-Cocok bila transaksi sudah dicatat harian di Excel atau di buku kas yang
-kemudian diketik massal.
+Buka tab **Persediaan**. Ada dua jenis barang:
 
-**Langkah:**
+1. **Seragam & ATK** — satuannya potong
+2. **Makanan & Minuman** — satuannya item
 
-1. Tab **Jurnal Transaksi** → klik **Unduh Template**. Simpan berkasnya.
-2. Buka berkas template tersebut di Excel. Isi mulai **baris 6**:
+Di bagian atas terlihat sisa stok dan nilainya masing-masing.
 
-   | Kolom | Isi |
-   |-------|-----|
-   | No Bukti | Nomor bukti. **Baris dengan nomor bukti sama = satu transaksi.** |
-   | Tanggal | `DD/MM/YYYY` (contoh `05/03/2026`) atau format tanggal Excel |
-   | Kode Akun | Kode akun, misal `111`. Tersedia daftar pilihan (dropdown) |
-   | Keterangan | Uraian transaksi |
-   | Debit | Isi angka, atau kosongkan/0 |
-   | Kredit | Isi angka, atau kosongkan/0 |
-   | Jenis | `JU` atau `AJP` |
+### Barang masuk (tombol hijau)
 
-   Sheet **DaftarAkun** di berkas yang sama memuat seluruh kode akun beserta
-   namanya sebagai rujukan.
+Dipakai setiap barang datang dari pemasok:
 
-3. Simpan berkas Excel tersebut.
-4. Kembali ke program → klik **Impor Excel** → pilih berkasnya.
-5. Program menampilkan **pratinjau**: daftar transaksi yang terbaca dan daftar
-   masalah bila ada (akun tidak dikenal, tanggal di luar periode, transaksi
-   tidak balance).
-6. Bila tidak ada masalah, klik **Impor Sekarang**.
+| Isian | Contoh |
+|-------|--------|
+| Tanggal | 02/03/2026 |
+| Jenis barang | Makanan & Minuman |
+| Keterangan | Beli snack dari pemasok |
+| Berapa unit masuk? | 200 |
+| Harga beli per unit | 3.000 |
+| Dibayar | Tunai sekarang / Belum dibayar (utang) |
 
-> Impor hanya berjalan bila seluruh transaksi balance dan seluruh kode akun
-> dikenali. Berkas `.xlsx`, `.xlsm`, dan `.csv` semuanya bisa dibaca.
+Program otomatis menambah stok, dan **buku kas ikut terisi sendiri** bila
+dibayar tunai. Tidak perlu mencatat dua kali.
 
-Berkas `contoh/Contoh_Impor_Terisi.xlsx` berisi transaksi contoh yang lengkap
-(penjualan tunai, penjualan kredit, pembelian, retur, beban, setoran bank,
-simpanan wajib, sampai jurnal penyesuaian) — silakan dijadikan acuan. Angkanya
-fiktif; sesuaikan juga bulan pada kolom Tanggal dengan periode tujuan.
+### Barang keluar (tombol oranye)
+
+Dipakai setiap barang terjual atau terpakai. **Cukup isi berapa unitnya:**
+
+| Isian | Contoh |
+|-------|--------|
+| Tanggal | 10/03/2026 |
+| Jenis barang | Makanan & Minuman |
+| Keterangan | Terjual 1–10 Maret |
+| Berapa unit keluar? | 150 |
+
+**Harga pokoknya dihitung sendiri oleh program.** Anda tidak perlu tahu
+berapa harga beli barang itu dulu — program menghitungnya dari rata-rata
+harga beli yang tercatat, dan langsung memasukkannya ke Laporan Laba Rugi.
+
+Uang hasil penjualannya tetap dicatat terpisah di **Buku Kas** sebagai uang
+masuk, karena jumlah uang yang diterima belum tentu sama dengan harga pokok
+barangnya — selisihnya itulah keuntungan kantin.
+
+### Penyesuaian stok
+
+Dipakai kalau hitungan fisik berbeda dengan catatan, misalnya barang rusak,
+hilang, atau kedaluwarsa. Isi selisih unitnya, beri tanda **minus** bila
+stok berkurang (contoh: `-5`).
 
 ---
 
-## 6. MELIHAT DAN MENCETAK LAPORAN
+## 6. PENJUALAN YANG DIBAYAR MENYUSUL
 
-Setiap laporan punya tombol **Cetak PDF** di bagian atasnya. Hasil cetak
-otomatis memakai kop koperasi, nomor halaman, waktu cetak, dan kolom tanda
+Untuk seragam yang diambil siswa tapi dibayar belakangan, pakai tombol
+**Penjualan dibayar menyusul** di tab Persediaan:
+
+| Isian | Contoh |
+|-------|--------|
+| Tanggal | 23/03/2026 |
+| Jenis barang | Seragam & ATK |
+| Pembeli / keterangan | Seragam 12 siswa kelas 7A |
+| Berapa unit terjual? | 12 |
+| Harga jual seluruhnya | 1.560.000 |
+
+Program mencatat piutang bertambah dan stok berkurang sekaligus.
+
+**Saat dilunasi nanti:** catat di **Buku Kas** sebagai uang masuk, pilih
+**Piutang — Pelanggan melunasi utangnya**.
+
+---
+
+## 7. MELIHAT DAN MENCETAK LAPORAN
+
+Semua laporan tersusun sendiri. Setiap laporan punya tombol **Cetak PDF**,
+lengkap dengan kop koperasi, nomor halaman, waktu cetak, dan kolom tanda
 tangan ketua serta bendahara.
 
-Laporan yang tersedia:
+| Laporan | Letaknya |
+|---------|----------|
+| Buku Kas | tab Buku Kas |
+| Kartu Persediaan | tab Persediaan |
+| Jurnal Umum | tab Jurnal |
+| Buku Besar per akun | tab Buku Besar |
+| Rekap Buku Besar | tab Buku Besar |
+| Neraca Lajur 12 kolom | tab Neraca Lajur |
+| Laporan Laba Rugi (SHU) | tab Laporan Keuangan |
+| Laporan Perubahan Modal | tab Laporan Keuangan |
+| **Laporan Posisi Keuangan** | tab Laporan Keuangan |
+| Laporan Arus Kas | tab Laporan Keuangan |
+| Rekap Penjualan Harian | tab Laporan Keuangan |
 
-| Laporan | Letak |
-|---------|-------|
-| Jurnal Umum | Tab Jurnal Transaksi |
-| Buku Besar (per akun) | Tab Buku Besar → mode "Per Akun" |
-| Rekap Buku Besar | Tab Buku Besar → mode "Rekap Semua Akun" |
-| Neraca Lajur 12 kolom | Tab Neraca Lajur |
-| Laporan Laba Rugi (SHU) | Tab Laporan Keuangan |
-| Laporan Perubahan Modal | Tab Laporan Keuangan |
-| Neraca | Tab Laporan Keuangan |
-| Laporan Arus Kas | Tab Laporan Keuangan |
-| Rekap Penjualan Harian | Tab Laporan Keuangan |
-| Daftar Akun | Tab Daftar Akun |
-| Saldo Awal | Tab Saldo Awal |
+**Cetak Semua (1 PDF)** menggabungkan laporan utama jadi satu berkas siap
+jilid untuk rapat anggota. **Ekspor Excel** mengeluarkan semuanya ke satu
+berkas Excel multi-sheet.
 
-**Tombol praktis:**
-
-- **Cetak Semua (1 PDF)** — menggabungkan 8 laporan utama menjadi satu berkas
-  PDF siap dijilid untuk laporan bulanan atau rapat anggota.
-- **Ekspor Excel** — mengekspor seluruh laporan ke satu berkas Excel
-  multi-sheet, bila angkanya masih ingin diolah lagi.
-
-Hasil cetak tersimpan di folder `Laporan` (menu **Berkas → Lokasi Data**),
-dan berkas PDF-nya langsung terbuka setelah selesai dibuat.
-
-Contoh hasil cetak dapat dilihat pada `contoh/Contoh_Laporan_Lengkap.pdf`.
-
----
-
-## 7. STOCK OPNAME DAN HPP
-
-Program memakai **metode persediaan fisik (periodik)** — metode yang lazim dan
-paling praktis untuk kantin koperasi.
-
-Artinya: setiap pembelian barang dagangan dicatat ke akun **511 Pembelian**
-(bukan langsung menambah akun Persediaan). Nilai persediaan yang sebenarnya
-ditentukan lewat **penghitungan fisik barang (stock opname)** di akhir bulan.
-
-**Cara mengisi:**
-
-1. Hitung fisik seluruh barang dagangan di kantin pada hari terakhir bulan.
-2. Buka tab **Neraca Lajur**.
-3. Isi kotak **Persediaan Akhir (Stock Opname)** dengan nilai rupiahnya.
-4. Klik **Simpan**.
-
-Program menghitung sendiri:
+### Bagaimana keuntungan dihitung?
 
 ```
-HPP = Persediaan Awal + Pembelian + Angkut Pembelian
-      − Retur Pembelian − Potongan Pembelian − Persediaan Akhir
+Uang hasil penjualan            (dari Buku Kas)
+  −  Harga pokok barang terjual (dari tab Persediaan, otomatis)
+  =  LABA KOTOR
+  −  Beban: gaji, listrik, dll  (dari Buku Kas)
+  =  SISA HASIL USAHA (SHU)
 ```
 
-**Penting:** bila stock opname tidak diisi, HPP akan dihitung nol dan SHU
-menjadi terlalu besar. Isi angka ini setiap akhir bulan sebelum tutup buku.
+Harga pokok dihitung dengan metode **rata-rata bergerak**: setiap kali
+barang masuk dengan harga berbeda, program menghitung ulang harga rata-rata,
+lalu memakainya saat barang keluar. Rinciannya bisa dilihat di Kartu
+Persediaan.
 
 ---
 
 ## 8. TUTUP BUKU KE BULAN BERIKUTNYA
 
-Tutup buku mengunci bulan berjalan dan memindahkan saldo akhir menjadi saldo
-awal bulan berikutnya, sekaligus memindahkan SHU ke akun Laba Ditahan.
+Tutup buku mengunci bulan berjalan dan memindahkan seluruh saldo ke bulan
+berikutnya.
 
-**Langkah:**
+1. Pastikan semua catatan bulan itu sudah masuk.
+2. Cocokkan sisa stok di tab Persediaan dengan hitungan fisik. Bila berbeda,
+   catat lewat **Penyesuaian stok**.
+3. Buka tab **Tutup Buku**, periksa hasil pemeriksaan kesiapan.
+4. Klik **Cadangkan Data** lebih dulu.
+5. Klik **Tutup Buku Periode Ini**.
 
-1. Pastikan seluruh transaksi bulan tersebut sudah masuk.
-2. Pastikan stock opname sudah diisi (bagian 7).
-3. Buka tab **Tutup Buku**. Program menampilkan hasil **pemeriksaan kesiapan**.
-   Bila ada peringatan berwarna merah, selesaikan dahulu.
-4. Periksa ringkasan angka yang ditampilkan (total penjualan, HPP, SHU,
-   total aktiva).
-5. Klik **Tutup Buku Periode Ini** dan konfirmasi.
-6. Periode baru terbentuk otomatis dan langsung menjadi periode aktif.
+Periode baru terbentuk otomatis. Saldo kas, piutang, utang, modal, dan sisa
+stok ikut terbawa sendiri.
 
-**Setelah tutup buku:** seluruh transaksi bulan tersebut terkunci dan tidak
-bisa diubah. Bila ternyata ada kesalahan, klik **Buka Kembali Periode** pada
-tab yang sama — periode berikutnya (bila masih kosong) akan dihapus, transaksi
-kembali bisa diedit, lalu tutup buku lagi setelah diperbaiki.
-
-> Disarankan menekan tombol **Cadangkan Data** sebelum tutup buku.
+**Keliru menutup?** Klik **Buka Kembali Periode** di tab yang sama.
 
 ---
 
-## 9. MENCADANGKAN DAN MEMULIHKAN DATA
+## 9. MENCADANGKAN DATA
 
-- **Berkas → Cadangkan Data** — membuat salinan basis data bertanggal di
-  folder `backup`. Lakukan minimal sebulan sekali dan sebelum tutup buku.
-- Program juga **mencadangkan otomatis setiap kali ditutup**.
-- **Berkas → Pulihkan Data** — mengembalikan data dari berkas cadangan.
-  Data yang ada sekarang akan tergantikan, jadi gunakan dengan hati-hati.
+- **Berkas → Cadangkan Data** — membuat salinan bertanggal.
+- Program juga mencadangkan otomatis setiap kali ditutup.
+- **Berkas → Pulihkan Data** — mengembalikan dari cadangan.
 
-**Sangat disarankan:** salin isi folder `backup` ke flashdisk atau Google Drive
-secara berkala. Kerusakan hard disk atau laptop hilang adalah penyebab
-kehilangan data pembukuan yang paling sering terjadi.
-
-**Khusus pemakai versi portable:** flashdisk jauh lebih mudah hilang, rusak,
-atau terformat daripada hard disk komputer. Salin seluruh folder `Data` ke
-komputer atau penyimpanan awan setidaknya setiap selesai tutup buku bulanan.
+**Salin folder cadangan ke flashdisk atau Google Drive secara berkala**,
+terutama setiap selesai tutup buku. Hard disk rusak dan laptop hilang adalah
+penyebab kehilangan pembukuan yang paling sering terjadi.
 
 ---
 
-## 10. ALUR KERJA BULANAN (RINGKAS)
+## 10. ALUR KERJA BULANAN
 
 ```
-SETIAP HARI / MINGGU
-  └─ Input transaksi  (Jurnal Transaksi → Transaksi Baru)
-     atau impor dari Excel  (Jurnal Transaksi → Impor Excel)
+SETIAP HARI ATAU SETIAP MINGGU
+  └─ Uang masuk / keluar      →  tab Buku Kas
+  └─ Barang datang / terjual  →  tab Persediaan
 
 AKHIR BULAN
-  1. Periksa kelengkapan transaksi           → tab Jurnal Transaksi
-  2. Input jurnal penyesuaian (jenis AJP)    → penyusutan, perlengkapan
-  3. Hitung fisik barang, isi stock opname   → tab Neraca Lajur
-  4. Periksa neraca lajur sudah BALANCE      → tab Neraca Lajur
-  5. Lihat Laba Rugi, Perubahan Modal,
-     Neraca, Arus Kas                        → tab Laporan Keuangan
-  6. Klik "Cetak Semua (1 PDF)"              → berkas laporan bulanan
-  7. Cadangkan data                          → Berkas → Cadangkan Data
-  8. Tutup buku                              → tab Tutup Buku
+  1. Periksa buku kas sudah lengkap
+  2. Cocokkan sisa stok dengan hitungan fisik;
+     bila beda, catat lewat "Penyesuaian stok"
+  3. Catat penyusutan peralatan bila ada     → tab Jurnal, jenis AJP
+  4. Lihat laporan keuangan                  → tab Laporan Keuangan
+  5. Klik "Cetak Semua (1 PDF)"
+  6. Cadangkan data                          → Berkas → Cadangkan Data
+  7. Tutup buku                              → tab Tutup Buku
 
- → Bulan berikutnya terbuka otomatis, saldo awal sudah terisi sendiri.
+ → Bulan berikutnya terbuka otomatis, saldo ikut terbawa sendiri.
 ```
 
 ---
 
-## 11. CONTOH JURNAL TRANSAKSI KANTIN
+## 11. TANYA JAWAB
 
-| Kejadian | Debit | Kredit |
-|----------|-------|--------|
-| Rekap penjualan tunai harian | 111 Kas | 411 Penjualan Kantin |
-| Penjualan seragam belum dibayar | 113 Piutang | 412 Penjualan Seragam & ATK |
-| Pelanggan melunasi piutang | 111 Kas | 113 Piutang |
-| Barang dikembalikan pembeli | 413 Retur & Potongan Penjualan | 111 Kas |
-| Beli barang dagangan tunai | 511 Pembelian | 111 Kas |
-| Beli barang dagangan kredit | 511 Pembelian | 211 Utang Usaha |
-| Ongkos angkut barang beli | 512 Angkut Pembelian | 111 Kas |
-| Kembalikan barang rusak ke supplier | 211 Utang Usaha | 513 Retur Pembelian |
-| Bayar utang ke supplier | 211 Utang Usaha | 111 Kas |
-| Bayar gaji penjaga kantin | 611 Beban Gaji / Honor | 111 Kas |
-| Bayar listrik & air | 612 Beban Listrik & Air | 111 Kas |
-| Setor kas ke bank | 112 Bank | 111 Kas |
-| Tarik tunai dari bank | 111 Kas | 112 Bank |
-| Terima simpanan wajib anggota | 111 Kas | 312 Simpanan Wajib |
-| Terima simpanan pokok anggota baru | 111 Kas | 311 Simpanan Pokok |
-| Beli peralatan kantin | 121 Peralatan | 111 Kas |
-| Penyusutan peralatan *(AJP)* | 614 Beban Penyusutan | 122 Akum. Penyusutan |
-| Pemakaian perlengkapan *(AJP)* | 613 Beban ATK & Perlengkapan | 115 Perlengkapan |
+**Saya tidak mengerti akuntansi, apa bisa memakai program ini?**
+Bisa. Isi tab Buku Kas dan tab Persediaan saja. Semua istilah akuntansi
+diurus program, tidak akan muncul di dua tab itu.
 
----
+**Barang dibeli, dicatat di Buku Kas atau di Persediaan?**
+Di **Persediaan**, lewat tombol Barang Masuk. Buku kas akan terisi sendiri.
+Kalau dicatat di keduanya, uangnya terhitung keluar dua kali.
 
-## 12. TANYA JAWAB DAN MENGATASI MASALAH
+**Saya tidak tahu harga pokok barang yang terjual.**
+Tidak perlu tahu. Isi jumlah unitnya saja, program yang menghitung.
 
-**Program tidak mau dibuka / muncul peringatan Windows SmartScreen.**
-Klik **More info** → **Run anyway**. Ini terjadi karena berkas EXE belum
-bersertifikat digital, bukan karena berisi virus.
+**Kenapa uang masuk dari penjualan tidak sama dengan nilai barang keluar?**
+Memang seharusnya berbeda. Uang masuk adalah harga jual, nilai barang keluar
+adalah harga beli. Selisihnya keuntungan kantin.
 
-**Tombol Simpan pada dialog jurnal tidak bisa ditekan.**
-Berarti total debit belum sama dengan total kredit. Periksa indikator
-BALANCE di bawah tabel rincian.
+**Stok di layar tidak cocok dengan barang yang ada.**
+Pakai **Penyesuaian stok** di tab Persediaan. Isi selisihnya, beri tanda
+minus bila barang yang ada lebih sedikit dari catatan.
 
-**Neraca tidak balance.**
-Penyebab paling sering: stock opname belum diisi, atau saldo awal belum
-seimbang. Buka tab Neraca Lajur dan periksa status di bagian bawah.
+**Barang keluar ditolak karena melebihi stok.**
+Berarti ada pembelian yang belum dicatat. Catat dulu Barang Masuk-nya.
 
-**SHU terasa terlalu besar.**
-Stock opname belum diisi sehingga HPP masih nol. Lihat bagian 7.
-
-**Saya salah input transaksi bulan lalu yang sudah ditutup.**
+**Saya salah mencatat bulan lalu yang sudah ditutup.**
 Tab Tutup Buku → **Buka Kembali Periode** → perbaiki → tutup buku lagi.
 
-**Impor Excel ditolak.**
-Baca daftar masalah di jendela pratinjau. Penyebab umum: kode akun salah
-ketik, tanggal di luar bulan periode tujuan, atau ada transaksi yang debit
-dan kreditnya tidak sama.
+**Bisa ditambah jenis barang selain dua itu?**
+Bisa, tapi perlu dibuatkan akun dan jenisnya lebih dulu. Hubungi yang
+menyiapkan program ini. Memisahkan seragam dan ATK jadi dua jenis tersendiri
+membuat harga pokoknya lebih tepat, karena harganya jauh berbeda.
 
-**Bagaimana memindahkan data ke komputer lain?**
-Menu **Berkas → Cadangkan Data**, salin berkas cadangannya ke komputer baru,
-pasang program di sana, lalu **Berkas → Pulihkan Data**. Bila memakai versi
-portable, cukup bawa flashdisknya — datanya sudah ikut.
+**Bagaimana memindahkan pembukuan ke komputer lain?**
+**Berkas → Cadangkan Data**, salin berkas cadangannya, lalu di komputer baru
+**Berkas → Pulihkan Data**. Kalau memakai versi portable, cukup bawa
+flashdisknya.
 
-**Apakah versi portable dan versi terpasang bisa dipakai bersamaan?**
-Bisa, tetapi datanya terpisah dan tidak saling menyusul. Pilih satu sebagai
-pembukuan resmi agar tidak ada angka yang tercecer di dua tempat.
-
-**Flashdisk saya terproteksi (read-only), apa yang terjadi?**
-Program otomatis beralih ke mode terpasang supaya pekerjaan tidak terhenti.
-Periksa menu **Berkas → Lokasi Data** untuk melihat data sedang ditulis
-ke mana.
-
-**Bisakah dipakai beberapa orang sekaligus?**
-Program ini dirancang untuk satu komputer (basis data lokal). Untuk pemakaian
-bersama, tunjuk satu komputer sebagai pencatat resmi, lalu bagikan hasil
-laporannya dalam bentuk PDF.
-
-**Bagaimana menambah akun baru?**
-Tab **Daftar Akun** → **Tambah Akun**. Isi kode, nama, kelompok (Aktiva/
-Kewajiban/Modal/Pendapatan/Beban), dan subkategori. Kode akun sebaiknya
-mengikuti pola yang sudah ada: 1xx aktiva, 2xx kewajiban, 3xx modal,
-4xx pendapatan, 5xx pembelian, 6xx beban.
+**Kenapa laporannya disebut "Laporan Posisi Keuangan", bukan "Neraca"?**
+Istilah itu yang dipakai standar akuntansi yang berlaku sekarang. Isinya
+sama: daftar harta, utang, dan modal koperasi pada tanggal tertentu.
 
 ---
 
-*Program Pembukuan Kantin Koperasi v1.0.0 — dokumen ini juga dapat dibuka
-dari dalam program melalui menu **Bantuan → Panduan**.*
+*Program Pembukuan Kantin Koperasi v2.0 — panduan ini juga bisa dibuka dari
+dalam program lewat menu **Bantuan → Panduan**.*

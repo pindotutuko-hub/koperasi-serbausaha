@@ -11,53 +11,73 @@ from .. import db, engine, pdfout, xlsio
 from . import widgets as w
 from .tab_data import TabAkun, TabSaldoAwal
 from .tab_jurnal import TabJurnal
+from .tab_kas import TabKas
+from .tab_persediaan import TabPersediaan
 from .tab_laporan import TabBukuBesar, TabLaporan, TabNeracaLajur
 
 PANDUAN = """PANDUAN SINGKAT PEMAKAIAN
 
-1. ALUR KERJA TIAP BULAN
-   Daftar Akun (sekali saja) → Saldo Awal (sekali, bulan pertama) → Jurnal Transaksi
-   → Buku Besar → Neraca Lajur (isi stock opname) → Laporan Keuangan → Tutup Buku.
+YANG PERLU DIISI PETUGAS HANYA DUA TAB
+   1. Tab "Buku Kas"    — setiap uang masuk dan uang keluar
+   2. Tab "Persediaan"  — setiap barang datang dan barang terjual
 
-2. MENCATAT TRANSAKSI
-   Buka tab "Jurnal Transaksi" → tombol "Input Transaksi". Isi tanggal, keterangan, lalu
-   rincian minimal 2 baris: satu Debit dan satu Kredit dengan jumlah yang sama.
-   Tombol "Transaksi cepat" mengisi pasangan akun yang umum secara otomatis.
-   Contoh penjualan kantin Rp 500.000 tunai:
-       Kas (111)              Debit   500.000
-       Penjualan Kantin (411) Kredit  500.000
-   Contoh pembelian barang dagang Rp 2.000.000 tunai:
-       Pembelian (511)        Debit  2.000.000
-       Kas (111)              Kredit 2.000.000
-   Jenis JU untuk transaksi biasa; AJP untuk jurnal penyesuaian (mis. penyusutan).
+   Dari dua catatan itu program menyusun sendiri jurnal, buku besar, neraca
+   lajur, sampai laporan keuangan. Tidak perlu tahu debit maupun kredit.
 
-3. IMPOR DARI EXCEL
-   Tab "Jurnal Transaksi" → "Unduh Template Impor" → isi di Excel → "Impor dari Excel".
-   Satu transaksi ditandai dengan No Bukti yang sama; total debit harus = total kredit.
-   Program menampilkan pratinjau dan daftar masalah sebelum data benar-benar masuk.
 
-4. PERSEDIAAN & HPP
-   Program memakai metode fisik/periodik: pembelian dicatat ke akun 511 (Pembelian),
-   bukan langsung ke Persediaan. Tiap akhir bulan isi hasil stock opname di tab
-   "Neraca Lajur". HPP = Persediaan Awal + Pembelian + Angkut − Retur − Potongan
-   − Persediaan Akhir. Bila stock opname dikosongkan, persediaan dianggap tidak berubah.
+1. MENCATAT UANG  (tab Buku Kas)
+   Tombol hijau "UANG MASUK" untuk uang yang diterima, tombol merah
+   "UANG KELUAR" untuk uang yang dikeluarkan. Isi tanggal, pilih "Untuk apa?"
+   dari daftar yang sudah diberi penjelasan, tulis keterangan, isi jumlahnya.
 
-5. LAPORAN & CETAK PDF
-   Tab "Laporan Keuangan" berisi Laba Rugi, Perubahan Modal, Neraca, Arus Kas, dan
-   Rekap Penjualan Harian. Tombol "Cetak Laporan Ini" membuat PDF laporan yang sedang
-   dibuka; "Cetak Semua Laporan (1 PDF)" menggabungkan seluruh laporan bulanan menjadi
-   satu berkas siap dilampirkan ke RAT. Semua tabel juga bisa diekspor ke Excel.
+   Pembelian barang dagangan TIDAK dicatat di sini — catat di tab Persediaan,
+   buku kas akan terisi sendiri.
+
+2. MENCATAT BARANG  (tab Persediaan)
+   "BARANG MASUK"  : barang datang. Isi jumlah unit dan harga beli per unit.
+                     Pilih dibayar tunai atau belum dibayar (utang pemasok).
+   "BARANG KELUAR" : barang terjual. CUKUP ISI JUMLAH UNITNYA. Harga pokok
+                     dihitung sendiri oleh program dari rata-rata harga beli.
+   "Penjualan dibayar menyusul" : seragam diambil siswa, dibayar belakangan.
+                     Piutang bertambah dan stok berkurang sekaligus.
+   "Penyesuaian stok" : barang rusak, hilang, atau hasil hitung fisik berbeda.
+                     Beri tanda minus bila stok berkurang.
+
+   Dua jenis barang disediakan: Seragam & ATK, serta Makanan & Minuman.
+
+3. PERSEDIAAN DAN HARGA POKOK
+   Persediaan dicatat secara PERPETUAL dengan harga pokok rata-rata bergerak.
+   Setiap barang masuk dengan harga berbeda, rata-ratanya dihitung ulang;
+   setiap barang keluar, harga pokoknya diambil dari rata-rata saat itu dan
+   langsung masuk ke Laporan Laba Rugi. Tidak perlu stock opname bulanan,
+   cukup Penyesuaian stok bila hitungan fisik berbeda dari catatan.
+
+       Uang hasil penjualan  −  Harga pokok barang terjual  =  Laba kotor
+       Laba kotor  −  Beban (gaji, listrik, dsb)            =  SHU
+
+4. LAPORAN DAN CETAK PDF
+   Tab "Laporan Keuangan" berisi Laba Rugi, Perubahan Modal, Laporan Posisi
+   Keuangan, Arus Kas, dan Rekap Penjualan Harian. Tombol "Cetak Laporan Ini"
+   mencetak laporan yang sedang dibuka; "Cetak Semua Laporan (1 PDF)"
+   menggabungkan seluruh laporan bulanan jadi satu berkas siap dilampirkan ke
+   RAT. Buku Kas dan Kartu Persediaan juga punya tombol cetaknya sendiri.
+
+5. JURNAL MANUAL  (tab Jurnal)
+   Untuk pengurus yang paham akuntansi. Dipakai bagi hal yang tidak lewat kas
+   maupun persediaan, misalnya penyusutan peralatan (pilih jenis AJP).
+   Seluruh catatan dari Buku Kas dan Persediaan juga tampil di sini.
 
 6. TUTUP BUKU
-   Tab "Tutup Buku" memeriksa kesiapan (jurnal balance, neraca balance, stock opname),
-   lalu mengunci periode dan membuat saldo awal bulan berikutnya secara otomatis —
-   termasuk memindahkan SHU ke akun Laba Ditahan. Tidak perlu jurnal penutup manual.
-   Bila ada koreksi, gunakan "Buka Kembali Periode" (urut dari bulan terakhir).
+   Tab "Tutup Buku" memeriksa kesiapan, lalu mengunci periode dan membuat
+   saldo awal bulan berikutnya secara otomatis — termasuk memindahkan SHU ke
+   akun Laba Ditahan dan membawa sisa stok. Tidak perlu jurnal penutup manual.
+   Bila ada koreksi, gunakan "Buka Kembali Periode".
 
-7. DATA & CADANGAN
-   Seluruh data tersimpan di satu berkas basis data di komputer ini
-   (menu Berkas → Lokasi Data). Lakukan "Cadangkan Data" secara berkala, mis. tiap
-   selesai tutup buku, dan simpan salinannya di flashdisk atau penyimpanan awan.
+7. DATA DAN CADANGAN
+   Seluruh data tersimpan di satu berkas basis data (menu Berkas → Lokasi
+   Data, yang juga menunjukkan apakah program berjalan mode portable).
+   Lakukan "Cadangkan Data" secara berkala, misalnya tiap selesai tutup buku,
+   dan simpan salinannya di flashdisk atau penyimpanan awan.
 """
 
 
@@ -86,10 +106,12 @@ class TabBeranda(ttk.Frame):
         aksi = ttk.Labelframe(self, text="Aksi cepat", padding=10)
         aksi.pack(fill="x", pady=(4, 10))
         tombol = [
-            ("➕  Input Transaksi", lambda: self.app.buka_tab("Jurnal Transaksi", "input"), "Utama.TButton"),
-            ("📥  Impor Jurnal Excel", lambda: self.app.buka_tab("Jurnal Transaksi", "impor"), "TButton"),
+            ("💵  Catat Uang Masuk / Keluar", lambda: self.app.buka_tab("Buku Kas"),
+             "Utama.TButton"),
+            ("📦  Catat Barang Masuk / Keluar", lambda: self.app.buka_tab("Persediaan"),
+             "TButton"),
             ("📊  Lihat Laporan Keuangan", lambda: self.app.buka_tab("Laporan Keuangan"), "TButton"),
-            ("📦  Cetak Semua Laporan (PDF)", self.app.cetak_paket, "TButton"),
+            ("🖨  Cetak Semua Laporan (PDF)", self.app.cetak_paket, "TButton"),
             ("🔒  Tutup Buku Bulan Ini", lambda: self.app.buka_tab("Tutup Buku"), "TButton"),
         ]
         for teks, perintah, gaya in tombol:
@@ -202,7 +224,7 @@ class TabTutupBuku(ttk.Frame):
                        "\n   ⚠  Stock opname belum diisi — HPP dihitung tanpa perubahan "
                        "persediaan. Sebaiknya isi dulu di tab Neraca Lajur.")
             self.lbl_cek.configure(
-                text=f"Siap ditutup:\n   ✓  Jurnal balance\n   ✓  Neraca balance\n"
+                text=f"Siap ditutup:\n   ✓  Jurnal balance\n   ✓  Posisi keuangan balance\n"
                      f"   ✓  Periode sebelumnya sudah beres{catatan}", foreground=w.HIJAU)
 
         berikut = "Januari %d" % (p["tahun"] + 1) if p["bulan"] == 12 else \
@@ -338,9 +360,13 @@ class Aplikasi(tk.Tk):
 
         self.notebook = ttk.Notebook(self)
         self.notebook.pack(fill="both", expand=True, padx=10, pady=(6, 10))
+        # Urutan tab mengikuti alur kerja sehari-hari: dua tab pencatatan
+        # lebih dulu, baru hasil olahannya, lalu pengaturan dan tutup buku.
         self.tab = {
             "Beranda": TabBeranda(self.notebook, self),
-            "Jurnal Transaksi": TabJurnal(self.notebook, self),
+            "Buku Kas": TabKas(self.notebook, self),
+            "Persediaan": TabPersediaan(self.notebook, self),
+            "Jurnal": TabJurnal(self.notebook, self),
             "Buku Besar": TabBukuBesar(self.notebook, self),
             "Neraca Lajur": TabNeracaLajur(self.notebook, self),
             "Laporan Keuangan": TabLaporan(self.notebook, self),
@@ -371,11 +397,11 @@ class Aplikasi(tk.Tk):
 
         data = tk.Menu(bar, tearoff=0)
         data.add_command(label="Input Transaksi Jurnal",
-                         command=lambda: self.buka_tab("Jurnal Transaksi", "input"))
+                         command=lambda: self.buka_tab("Jurnal", "input"))
         data.add_command(label="Impor Jurnal dari Excel",
-                         command=lambda: self.buka_tab("Jurnal Transaksi", "impor"))
+                         command=lambda: self.buka_tab("Jurnal", "impor"))
         data.add_command(label="Unduh Template Impor",
-                         command=lambda: self.buka_tab("Jurnal Transaksi", "template"))
+                         command=lambda: self.buka_tab("Jurnal", "template"))
         data.add_separator()
         data.add_command(label="Daftar Akun (COA)", command=lambda: self.buka_tab("Daftar Akun"))
         data.add_command(label="Saldo Awal", command=lambda: self.buka_tab("Saldo Awal"))
@@ -388,7 +414,7 @@ class Aplikasi(tk.Tk):
                               ("Neraca Lajur", pdfout.cetak_neraca_lajur),
                               ("Laba Rugi", pdfout.cetak_laba_rugi),
                               ("Perubahan Modal", pdfout.cetak_perubahan_modal),
-                              ("Neraca", pdfout.cetak_neraca),
+                              ("Laporan Posisi Keuangan", pdfout.cetak_neraca),
                               ("Arus Kas", pdfout.cetak_arus_kas),
                               ("Rekap Penjualan Harian", pdfout.cetak_rekap_penjualan)):
             laporan.add_command(label=f"Cetak PDF — {label}",

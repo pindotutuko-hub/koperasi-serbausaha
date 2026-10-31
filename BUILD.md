@@ -185,6 +185,27 @@ berkas tersebut sebelum membangun EXE.
 ---
 
 ## RIWAYAT PERUBAHAN
+**2.0.0**
+- Alur pencatatan dirancang ulang untuk petugas tanpa dasar akuntansi:
+  tab **Buku Kas** (uang masuk/keluar dengan pilihan berbahasa awam) dan
+  tab **Persediaan** (barang datang/terjual) menjadi satu-satunya tempat
+  input. Jurnal, buku besar, neraca lajur, dan laporan keuangan tersusun
+  sendiri dari kedua catatan itu.
+- Persediaan **perpetual** dengan harga pokok **rata-rata bergerak**, dua
+  jenis barang: Seragam & ATK, serta Makanan & Minuman. Barang keluar cukup
+  diisi jumlah unitnya; harga pokok dihitung program dan langsung masuk ke
+  Laporan Laba Rugi. Stock opname bulanan tidak lagi diperlukan.
+- Penjualan yang dibayar menyusul: piutang bertambah dan stok berkurang
+  dalam satu langkah; pelunasannya dicatat lewat Buku Kas.
+- Istilah **Neraca** diganti **Laporan Posisi Keuangan** di seluruh
+  antarmuka, judul PDF, nama berkas, dan dokumentasi. "Neraca Lajur" dan
+  "Neraca Saldo" tetap, karena keduanya istilah baku tersendiri.
+- Laporan baru: Buku Kas dan Kartu Persediaan, keduanya siap cetak PDF.
+- Basis data naik ke versi 2 dengan migrasi otomatis. Pembukuan lama tetap
+  utuh dan tetap dihitung dengan metode periodik agar angkanya tidak
+  bergeser; pencatatan baru memakai perpetual. Saldo persediaan lama
+  dibiarkan di akunnya sendiri dan tidak dicampur dengan persediaan baru.
+
 
 **1.0.1b** — versi repositori
 - Mode **portable** untuk Windows dan macOS: data disimpan di folder `Data`

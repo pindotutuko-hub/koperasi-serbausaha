@@ -4,8 +4,8 @@
 # (tampil di tab "Details" saat klik kanan > Properties).
 VSVersionInfo(
   ffi=FixedFileInfo(
-    filevers=(1, 0, 1, 0),
-    prodvers=(1, 0, 1, 0),
+    filevers=(2, 0, 0, 0),
+    prodvers=(2, 0, 0, 0),
     mask=0x3f,
     flags=0x0,
     OS=0x40004,
@@ -20,12 +20,12 @@ VSVersionInfo(
           '040904B0',
           [StringStruct('CompanyName', 'Pembukuan Kantin Koperasi'),
            StringStruct('FileDescription', 'Program Pembukuan Kantin Koperasi'),
-           StringStruct('FileVersion', '1.0.1'),
+           StringStruct('FileVersion', '2.0.0'),
            StringStruct('InternalName', 'KantinKoperasi'),
            StringStruct('LegalCopyright', 'Bebas digunakan oleh koperasi mana pun'),
            StringStruct('OriginalFilename', 'KantinKoperasi.exe'),
            StringStruct('ProductName', 'Program Pembukuan Kantin Koperasi'),
-           StringStruct('ProductVersion', '1.0.1')])
+           StringStruct('ProductVersion', '2.0.0')])
       ]),
     VarFileInfo([VarStruct('Translation', [1033, 1200])])
   ]

@@ -396,7 +396,7 @@ def ekspor_laporan_excel(periode_id: int, path: str) -> str:
                  baris, [len(baris) - 1], (3, 4, 5, 6))
     _lebar(ws, {"A": 8, "B": 30, "C": 18, "D": 18, "E": 18, "F": 18})
 
-    ws = wb.create_sheet("Neraca")
+    ws = wb.create_sheet("PosisiKeuangan")
     baris, tebal = [], []
     baris.append(["AKTIVA LANCAR", None])
     tebal.append(0)
@@ -427,7 +427,7 @@ def ekspor_laporan_excel(periode_id: int, path: str) -> str:
     tebal.append(len(baris) - 1)
     baris.append(["TOTAL KEWAJIBAN & MODAL", nr["total_pasiva"]])
     tebal.append(len(baris) - 1)
-    _tulis_tabel(ws, "LAPORAN POSISI KEUANGAN (NERACA)",
+    _tulis_tabel(ws, "LAPORAN POSISI KEUANGAN",
                  f"Per akhir {per}", ["Uraian", "Jumlah"], baris, tebal, (2,))
     _lebar(ws, {"A": 46, "B": 20})
 

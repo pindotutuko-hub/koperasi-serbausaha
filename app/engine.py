@@ -16,8 +16,14 @@ KATEGORI_NERACA = ("Aset", "Kewajiban", "Modal")
 KATEGORI_LR = ("Pendapatan", "HPP", "Beban")
 SUBKATEGORI = ["Aktiva Lancar", "Aktiva Tetap", "Kewajiban", "Modal",
                "Pendapatan", "HPP", "Beban"]
-PERAN = ["", "KAS", "BANK", "PERSEDIAAN", "LABA_DITAHAN", "PEMBELIAN",
-         "ANGKUT_BELI", "RETUR_BELI", "POTONGAN_BELI", "RETUR_JUAL"]
+PERAN = ["", "KAS", "BANK", "PERSEDIAAN", "LABA_DITAHAN", "HPP",
+         "SELISIH_PERSEDIAAN", "RETUR_JUAL",
+         # Peran di bawah hanya dipakai pembukuan lama bermetode periodik.
+         "PEMBELIAN", "ANGKUT_BELI", "RETUR_BELI", "POTONGAN_BELI"]
+
+# Peran yang boleh dipakai lebih dari satu akun. Peran lain harus unik,
+# misalnya hanya boleh ada satu akun Kas dan satu akun Laba Ditahan.
+PERAN_BOLEH_GANDA = {"PERSEDIAAN", "HPP"}
 JENIS_JURNAL = ["JU", "AJP"]
 
 
@@ -125,7 +131,7 @@ def simpan_akun(kode: str, nama: str, kategori: str, subkategori: str,
         raise ValueError("Kategori tidak dikenal.")
     if saldo_normal not in ("Debet", "Kredit"):
         raise ValueError("Saldo normal harus Debet atau Kredit.")
-    if peran:
+    if peran and peran not in PERAN_BOLEH_GANDA:
         lain = kon.execute("SELECT kode FROM akun WHERE peran=? AND kode<>?",
                            (peran, kode_lama or kode)).fetchone()
         if lain:
@@ -229,23 +235,39 @@ def neraca_lajur(periode_id: int) -> dict:
         )
         baris.append(r)
 
-    akun_persediaan = next((r for r in baris if r["peran"] == "PERSEDIAAN"), None)
-    persediaan_awal = akun_persediaan["nsd"] if akun_persediaan else 0.0
-    if p and p["persediaan_akhir"] is not None:
-        persediaan_akhir = bulat(p["persediaan_akhir"])
+    # Persediaan boleh lebih dari satu akun (satu per jenis barang).
+    baris_persediaan = [r for r in baris if r["peran"] == "PERSEDIAAN"]
+    persediaan_awal = bulat(sum(r["nsd"] for r in baris_persediaan))
+
+    # Metode periodik dikenali dari terpakainya akun Pembelian dan kawan-kawan.
+    # Pembukuan lama tetap diperlakukan periodik agar angkanya tidak bergeser;
+    # pencatatan baru memakai perpetual, yang tidak perlu perlakuan khusus
+    # karena saldo persediaan sudah benar dengan sendirinya dari mutasi.
+    pakai_periodik = any(
+        r["peran"] in ("PEMBELIAN", "ANGKUT_BELI", "RETUR_BELI", "POTONGAN_BELI")
+        and bulat(r["nsd"]) for r in baris)
+
+    if pakai_periodik:
+        if p and p["persediaan_akhir"] is not None:
+            persediaan_akhir = bulat(p["persediaan_akhir"])
+        else:
+            persediaan_akhir = persediaan_awal   # belum opname -> dianggap tetap
     else:
-        persediaan_akhir = persediaan_awal  # belum opname -> dianggap tidak berubah
+        persediaan_akhir = persediaan_awal       # perpetual: saldo buku = saldo nyata
 
     for r in baris:
         if r["kategori"] in KATEGORI_LR:
             r["lr_d"], r["lr_k"] = r["nsd_d"], r["nsd_k"]
         else:
             r["nrc_d"], r["nrc_k"] = r["nsd_d"], r["nsd_k"]
-        if r["peran"] == "PERSEDIAAN":
-            # metode periodik: persediaan awal masuk HPP, persediaan akhir tampil di Neraca
+        if pakai_periodik and r["peran"] == "PERSEDIAAN":
+            # Periodik: persediaan awal masuk kolom Laba/Rugi sebagai unsur
+            # harga pokok, persediaan akhir dimunculkan di kolom Neraca.
+            bagian = bulat(persediaan_akhir * r["nsd"] / persediaan_awal) \
+                if persediaan_awal else bulat(persediaan_akhir)
             r["lr_d"], r["lr_k"] = _sisi(r["nsd"])[0], _sisi(r["nsd"])[1]
-            r["lr_k"] += persediaan_akhir
-            r["nrc_d"], r["nrc_k"] = _sisi(persediaan_akhir)
+            r["lr_k"] += bagian
+            r["nrc_d"], r["nrc_k"] = _sisi(bagian)
 
     tot = {k: bulat(sum(r[k] for r in baris)) for k in
            ("awal_d", "awal_k", "mut_d", "mut_k", "ns_d", "ns_k", "adj_d", "adj_k",
@@ -256,6 +278,7 @@ def neraca_lajur(periode_id: int) -> dict:
     return dict(periode=p, baris=baris, total=tot, shu=shu, seimbang=seimbang,
                 persediaan_awal=bulat(persediaan_awal),
                 persediaan_akhir=bulat(persediaan_akhir),
+                metode="PERIODIK" if pakai_periodik else "PERPETUAL",
                 opname_diisi=bool(p and p["persediaan_akhir"] is not None))
 
 
@@ -293,9 +316,30 @@ def laba_rugi(periode_id: int, nl: dict | None = None) -> dict:
     hpp_lain = bulat(sum(r["nsd"] for r in baris
                          if r["kategori"] == "HPP" and r["peran"] not in peran_hpp))
 
-    pembelian_bersih = bulat(pembelian + angkut - retur_beli - potongan_beli + hpp_lain)
-    tersedia = bulat(persediaan_awal + pembelian_bersih)
-    hpp = bulat(tersedia - persediaan_akhir)
+    # Dua cara menghitung harga pokok penjualan:
+    #
+    #   PERPETUAL (dipakai sejak versi 2) — harga pokok sudah terbentuk sendiri
+    #       setiap kali barang keluar lewat Mutasi Persediaan, jadi tinggal
+    #       menjumlahkan saldo akun-akun HPP.
+    #   PERIODIK (pembukuan lama) — harga pokok dihitung dari persediaan awal
+    #       ditambah pembelian dikurangi persediaan akhir hasil stock opname.
+    #
+    # Periode lama yang memakai akun Pembelian tetap dihitung cara periodik
+    # supaya angkanya tidak bergeser dari pembukuan yang sudah disahkan.
+    pakai_periodik = bool(pembelian or angkut or retur_beli or potongan_beli)
+    metode = "PERIODIK" if pakai_periodik else "PERPETUAL"
+
+    rincian_hpp = []
+    if pakai_periodik:
+        pembelian_bersih = bulat(pembelian + angkut - retur_beli - potongan_beli + hpp_lain)
+        tersedia = bulat(persediaan_awal + pembelian_bersih)
+        hpp = bulat(tersedia - persediaan_akhir)
+    else:
+        rincian_hpp = [dict(kode=r["kode"], nama=r["nama"], nilai=bulat(r["nsd"]))
+                       for r in baris if r["kategori"] == "HPP" and bulat(r["nsd"])]
+        hpp = bulat(sum(x["nilai"] for x in rincian_hpp))
+        tersedia = bulat(persediaan_awal + hpp)
+
     laba_kotor = bulat(total_pendapatan - hpp)
 
     beban = [dict(kode=r["kode"], nama=r["nama"], nilai=bulat(r["nsd"]))
@@ -308,7 +352,8 @@ def laba_rugi(periode_id: int, nl: dict | None = None) -> dict:
                 pembelian=pembelian, angkut=angkut, retur_beli=retur_beli,
                 potongan_beli=potongan_beli, hpp_lain=hpp_lain,
                 barang_tersedia=tersedia, persediaan_akhir=persediaan_akhir,
-                hpp=hpp, laba_kotor=laba_kotor, beban=beban, total_beban=total_beban,
+                hpp=hpp, rincian_hpp=rincian_hpp, metode=metode,
+                laba_kotor=laba_kotor, beban=beban, total_beban=total_beban,
                 shu=shu, opname_diisi=nl["opname_diisi"])
 
 

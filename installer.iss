@@ -5,7 +5,7 @@
 ; ============================================================================
 
 #define NamaApp        "Program Pembukuan Kantin Koperasi"
-#define VersiApp       "1.0.1"
+#define VersiApp       "2.0.0"
 #define PenerbitApp    "Pembukuan Kantin Koperasi"
 #define ExeApp         "KantinKoperasi.exe"
 

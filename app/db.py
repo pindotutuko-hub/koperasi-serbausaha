@@ -9,8 +9,8 @@ import sys
 from datetime import datetime
 
 APP_NAME = "KantinKoperasi"
-VERSI_APLIKASI = "1.0.1"
-VERSI_DB = 1
+VERSI_APLIKASI = "2.0.0"
+VERSI_DB = 2
 
 SKEMA = """
 CREATE TABLE IF NOT EXISTS pengaturan (
@@ -64,6 +64,32 @@ CREATE TABLE IF NOT EXISTS jurnal_detail (
     urut       INTEGER DEFAULT 0,
     FOREIGN KEY (jurnal_id) REFERENCES jurnal (id) ON DELETE CASCADE
 );
+CREATE TABLE IF NOT EXISTS jenis_persediaan (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    nama       TEXT NOT NULL UNIQUE,
+    satuan     TEXT DEFAULT 'unit',
+    kode_akun  TEXT NOT NULL,       -- akun persediaan di neraca
+    kode_hpp   TEXT NOT NULL,       -- akun harga pokok penjualan
+    kode_jual  TEXT NOT NULL,       -- akun pendapatan penjualannya
+    urut       INTEGER DEFAULT 0,
+    aktif      INTEGER DEFAULT 1
+);
+CREATE TABLE IF NOT EXISTS mutasi_persediaan (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    periode_id  INTEGER NOT NULL,
+    jenis_id    INTEGER NOT NULL,
+    tanggal     TEXT NOT NULL,
+    arah        TEXT NOT NULL,       -- MASUK / KELUAR / PENYESUAIAN
+    keterangan  TEXT,
+    jumlah      REAL DEFAULT 0,      -- banyaknya unit
+    harga       REAL DEFAULT 0,      -- harga per unit (MASUK: dari nota; KELUAR: dihitung sistem)
+    nilai       REAL DEFAULT 0,      -- jumlah x harga
+    sisa_jumlah REAL DEFAULT 0,      -- saldo unit setelah mutasi ini
+    sisa_nilai  REAL DEFAULT 0,      -- saldo rupiah setelah mutasi ini
+    jurnal_id   INTEGER,             -- jurnal yang dibentuk dari mutasi ini
+    dibuat      TEXT,
+    FOREIGN KEY (jenis_id) REFERENCES jenis_persediaan (id)
+);
 CREATE TABLE IF NOT EXISTS log (
     id     INTEGER PRIMARY KEY AUTOINCREMENT,
     waktu  TEXT,
@@ -73,6 +99,8 @@ CREATE TABLE IF NOT EXISTS log (
 CREATE INDEX IF NOT EXISTS ix_jurnal_periode ON jurnal (periode_id);
 CREATE INDEX IF NOT EXISTS ix_detail_jurnal  ON jurnal_detail (jurnal_id);
 CREATE INDEX IF NOT EXISTS ix_detail_akun    ON jurnal_detail (kode_akun);
+CREATE INDEX IF NOT EXISTS ix_mutasi_periode ON mutasi_persediaan (periode_id);
+CREATE INDEX IF NOT EXISTS ix_mutasi_jenis   ON mutasi_persediaan (jenis_id, tanggal, id);
 """
 
 PENGATURAN_BAWAAN = {
@@ -203,6 +231,7 @@ def koneksi() -> sqlite3.Connection:
         if baru:
             isi_data_awal(_koneksi)
         lengkapi_pengaturan(_koneksi)
+        migrasi(_koneksi)
         _koneksi.commit()
     return _koneksi
 
@@ -259,9 +288,9 @@ def isi_data_awal(kon: sqlite3.Connection) -> None:
     for a in data.get("akun", []):
         kon.execute(
             "INSERT OR IGNORE INTO akun (kode,nama,kategori,subkategori,saldo_normal,peran,urut,aktif)"
-            " VALUES (?,?,?,?,?,?,?,1)",
+            " VALUES (?,?,?,?,?,?,?,?)",
             (a["kode"], a["nama"], a["kategori"], a.get("subkategori") or a["kategori"],
-             a["saldo_normal"], a.get("peran", ""), a.get("urut", 0)),
+             a["saldo_normal"], a.get("peran", ""), a.get("urut", 0), a.get("aktif", 1)),
         )
 
     periode_jurnal = sorted(data.get("jurnal", {}).keys())
@@ -295,10 +324,96 @@ def isi_data_awal(kon: sqlite3.Connection) -> None:
                     (cur.lastrowid, d["kode"], v.get("keterangan", ""),
                      d.get("debit", 0), d.get("kredit", 0), u),
                 )
+    for j in data.get("jenis_persediaan", []):
+        kon.execute(
+            "INSERT OR IGNORE INTO jenis_persediaan"
+            " (nama,satuan,kode_akun,kode_hpp,kode_jual,urut,aktif) VALUES (?,?,?,?,?,?,1)",
+            (j["nama"], j.get("satuan", "unit"), j["kode_akun"],
+             j["kode_hpp"], j["kode_jual"], j.get("urut", 0)),
+        )
+
     kon.execute(
         "INSERT INTO log (waktu,aksi,detail) VALUES (?,?,?)",
         (sekarang, "BASIS DATA DIBUAT",
-         "Data awal (COA, saldo awal, jurnal) dimuat dari berkas Excel koperasi."),
+         "Data awal (bagan akun dan jenis persediaan) dimuat."),
+    )
+
+
+def migrasi(kon: sqlite3.Connection) -> None:
+    """Menyesuaikan basis data lama ke struktur terbaru.
+
+    Dipanggil setiap kali koneksi dibuka. Aman dijalankan berulang kali:
+    setiap langkah memeriksa dulu apakah pekerjaannya sudah dilakukan.
+    Data lama tidak pernah dihapus.
+    """
+    versi = kon.execute(
+        "SELECT nilai FROM pengaturan WHERE kunci='versi_db'").fetchone()
+    versi = int(versi["nilai"]) if versi and str(versi["nilai"]).isdigit() else 1
+    if versi >= VERSI_DB:
+        return
+
+    berkas = os.path.join(folder_program(), "app", "data_awal.json")
+    if not os.path.exists(berkas):
+        berkas = os.path.join(folder_program(), "data_awal.json")
+    data = {}
+    if os.path.exists(berkas):
+        with open(berkas, encoding="utf-8") as f:
+            data = json.load(f)
+
+    ada = {r["kode"] for r in kon.execute("SELECT kode FROM akun")}
+
+    # 1. Akun baru untuk persediaan perpetual
+    for a in data.get("akun", []):
+        if a["kode"] not in ada:
+            kon.execute(
+                "INSERT INTO akun (kode,nama,kategori,subkategori,saldo_normal,peran,urut,aktif)"
+                " VALUES (?,?,?,?,?,?,?,?)",
+                (a["kode"], a["nama"], a["kategori"],
+                 a.get("subkategori") or a["kategori"], a["saldo_normal"],
+                 a.get("peran", ""), a.get("urut", 0), a.get("aktif", 1)),
+            )
+
+    # 2. Akun persediaan lama dipisahkan dari akun persediaan perpetual.
+    #
+    #    Saldo persediaan dari pembukuan terdahulu tetap tinggal di akun 114
+    #    dan tidak diusik, sesuai permintaan: buku persediaan baru dipakai
+    #    untuk transaksi ke depan, bukan untuk menata ulang yang sudah ada.
+    #    Kalau keduanya memakai akun yang sama, kartu persediaan dan laporan
+    #    posisi keuangan akan menunjukkan angka yang berbeda.
+    terpakai = kon.execute(
+        "SELECT (SELECT COUNT(*) FROM jurnal_detail WHERE kode_akun='114')"
+        " + (SELECT COUNT(*) FROM saldo_awal WHERE kode_akun='114') AS c"
+    ).fetchone()["c"]
+    if terpakai:
+        kon.execute(
+            "UPDATE akun SET nama='Persediaan Barang Toko (saldo lama)', peran=''"
+            " WHERE kode='114' AND nama='Persediaan Barang Toko'")
+    else:
+        kon.execute("UPDATE akun SET peran='', aktif=0 WHERE kode='114'")
+
+    # 3. Akun metode periodik dinonaktifkan — hanya bila belum pernah terpakai,
+    #    supaya pembukuan lama yang memakainya tetap utuh dan terbaca.
+    for kode in ("511", "512", "513", "514"):
+        dipakai = kon.execute(
+            "SELECT COUNT(*) c FROM jurnal_detail WHERE kode_akun=?", (kode,)).fetchone()["c"]
+        if not dipakai:
+            kon.execute("UPDATE akun SET aktif=0 WHERE kode=?", (kode,))
+
+    # 4. Jenis persediaan bawaan
+    for j in data.get("jenis_persediaan", []):
+        kon.execute(
+            "INSERT OR IGNORE INTO jenis_persediaan"
+            " (nama,satuan,kode_akun,kode_hpp,kode_jual,urut,aktif) VALUES (?,?,?,?,?,?,1)",
+            (j["nama"], j.get("satuan", "unit"), j["kode_akun"],
+             j["kode_hpp"], j["kode_jual"], j.get("urut", 0)),
+        )
+
+    kon.execute("UPDATE pengaturan SET nilai=? WHERE kunci='versi_db'", (str(VERSI_DB),))
+    kon.execute(
+        "INSERT INTO log (waktu,aksi,detail) VALUES (?,?,?)",
+        (datetime.now().isoformat(timespec="seconds"), "BASIS DATA DIPERBARUI",
+         f"Struktur dinaikkan dari versi {versi} ke {VERSI_DB}: "
+         "persediaan perpetual dua jenis, buku kas, dan akun harga pokok penjualan."),
     )
 
 
