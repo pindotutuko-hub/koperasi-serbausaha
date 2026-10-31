@@ -55,7 +55,13 @@ tanpa itu, pengguna cukup klik kanan → Open pada pembukaan pertama.
 
 Aplikasi yang dibangun hanya berjalan di arsitektur mesin pembangunnya: Mac
 Apple Silicon menghasilkan versi Apple Silicon, Mac Intel menghasilkan versi
-Intel. Untuk keduanya sekaligus, pakai GitHub Actions di bawah.
+Intel.
+
+**Catatan penting:** GitHub sudah menghentikan mesin pembangun Mac Intel
+(`macos-13`), dan `macos-14` pensiun 2 November 2026. Alur kerja di
+repositori ini memakai `macos-15` (Apple Silicon). Jadi berkas Mac siap pakai
+di halaman Releases hanya untuk Apple Silicon — pemakai Mac Intel harus
+menjalankan `build_mac.sh` sendiri di mesin Intel-nya.
 
 ---
 

@@ -25,8 +25,11 @@ Ambil berkas jadi di halaman **[Releases](../../releases)**:
 | `PembukuanKantin-Portable-Windows.zip` | Windows — jalan dari flashdisk, tanpa dipasang |
 | `KantinKoperasi_Setup_1.0.1.exe` | Windows — dipasang seperti aplikasi biasa |
 | `PembukuanKantin-Portable-macOS-AppleSilicon.zip` | Mac M1/M2/M3/M4 — portable |
-| `PembukuanKantin-Portable-macOS-Intel.zip` | Mac Intel — portable |
-| `KantinKoperasi-macOS-*.dmg` | Mac — dipasang ke folder Applications |
+| `KantinKoperasi-macOS-AppleSilicon.dmg` | Mac M1/M2/M3/M4 — dipasang ke Applications |
+
+Berkas Mac di atas untuk **Apple Silicon** (M1/M2/M3/M4). GitHub sudah tidak
+menyediakan mesin pembangun Mac Intel, jadi pemakai Mac Intel perlu membangun
+sendiri di mesinnya dengan `bash build_mac.sh` (lihat [BUILD.md](BUILD.md)).
 
 Belum ada berkas di Releases? Buka tab **Actions → Bangun Aplikasi → Run
 workflow**, tunggu 5–10 menit, lalu unduh di bagian **Artifacts**. Semua versi

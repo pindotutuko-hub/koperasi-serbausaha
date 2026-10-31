@@ -120,8 +120,7 @@ jobs:
             | `PembukuanKantin-Portable-Windows.zip` | Windows — jalan dari flashdisk, tanpa dipasang |
             | `KantinKoperasi_Setup_*.exe` | Windows — dipasang seperti aplikasi biasa |
             | `PembukuanKantin-Portable-macOS-AppleSilicon.zip` | Mac M1/M2/M3/M4 — portable |
-            | `PembukuanKantin-Portable-macOS-Intel.zip` | Mac Intel — portable |
-            | `KantinKoperasi-macOS-*.dmg` | Mac — dipasang ke folder Applications |
+            | `KantinKoperasi-macOS-AppleSilicon.dmg` | Mac M1/M2/M3/M4 — dipasang ke Applications |
 
             **Mac, membuka pertama kali:** klik kanan aplikasi → Open → Open.
             **Windows, membuka pertama kali:** More info → Run anyway.
@@ -129,9 +128,15 @@ jobs:
             Keduanya muncul karena aplikasi belum bersertifikat digital
             berbayar, bukan karena berisi virus.
 
-            Berkas Mac Intel menyusul bila runner-nya sudah tersedia.
+            Berkas Mac di atas untuk Apple Silicon (M1/M2/M3/M4). GitHub tidak
+            lagi menyediakan mesin pembangun Mac Intel, jadi pemakai Mac Intel
+            perlu membangun sendiri dengan `bash build_mac.sh`.
 
   # ===================================================================== #
+  # GitHub menghentikan runner macOS Intel (macos-13), dan macos-14 pensiun
+  # 2 November 2026. Yang tersisa hanya Apple Silicon, jadi berkas jadi di
+  # Releases berlaku untuk Mac M1/M2/M3/M4. Pemakai Mac Intel membangun
+  # sendiri di mesinnya dengan build_mac.sh.
   macos:
     name: macOS (${{ matrix.arsitektur }})
     runs-on: ${{ matrix.runner }}
@@ -139,10 +144,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - runner: macos-14        # Apple Silicon (M1/M2/M3/M4)
+          - runner: macos-15        # Apple Silicon (M1/M2/M3/M4)
             arsitektur: AppleSilicon
-          - runner: macos-13        # Intel
-            arsitektur: Intel
     steps:
       - uses: actions/checkout@v4
 
