@@ -71,22 +71,46 @@ cp -Rf contoh dist/ 2>/dev/null || true
 
 # --- 5. Buat DMG ------------------------------------------------------------
 echo "[5/5] Membuat berkas DMG..."
-STAGING="$(mktemp -d)"
+STAGING="dmg-staging"
+VOLUME="Pembukuan Kantin Koperasi"
+DMG="dist/KantinKoperasi-mac.dmg"
+
+rm -rf "$STAGING"; mkdir -p "$STAGING"
 cp -R "dist/KantinKoperasi.app" "$STAGING/"
 ln -s /Applications "$STAGING/Applications"
 cp -f PANDUAN.md "$STAGING/" 2>/dev/null || true
-rm -f "dist/KantinKoperasi-mac.dmg"
-hdiutil create -volname "Pembukuan Kantin Koperasi" \
-    -srcfolder "$STAGING" -ov -format UDZO \
-    "dist/KantinKoperasi-mac.dmg" >/dev/null
+sync
+
+# hdiutil kadang menjawab "Resource busy" bila Spotlight masih memegang
+# folder sumber, jadi dicoba beberapa kali sebelum menyerah.
+DMG_JADI=0
+for percobaan in 1 2 3; do
+    rm -f "$DMG"
+    hdiutil detach "/Volumes/$VOLUME" -force >/dev/null 2>&1 || true
+    if hdiutil create -volname "$VOLUME" -srcfolder "$STAGING" \
+         -ov -format UDZO -fs HFS+ "$DMG" >/dev/null 2>&1; then
+        DMG_JADI=1
+        break
+    fi
+    echo "      Percobaan ke-$percobaan gagal, mencoba lagi dalam 10 detik..."
+    sleep 10
+done
 rm -rf "$STAGING"
+
+if [ "$DMG_JADI" != "1" ]; then
+    echo
+    merah "  [!] Berkas DMG gagal dibuat (hdiutil sibuk)."
+    echo "      Aplikasinya sendiri sudah jadi di dist/KantinKoperasi.app"
+    echo "      dan bisa langsung dipakai atau disalin."
+    echo "      Untuk mencoba DMG lagi, jalankan ulang skrip ini."
+fi
 
 echo
 hijau "================================================================"
 hijau "  SELESAI!"
 echo
 echo "  Aplikasi  : dist/KantinKoperasi.app"
-echo "  Pemasangan: dist/KantinKoperasi-mac.dmg"
+if [ "$DMG_JADI" = "1" ]; then echo "  Pemasangan: dist/KantinKoperasi-mac.dmg"; fi
 echo
 echo "  Membuka pertama kali: klik KANAN ikon aplikasi lalu pilih Open,"
 echo "  kemudian tekan Open lagi pada kotak peringatan. Cukup sekali;"

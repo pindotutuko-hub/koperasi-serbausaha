@@ -166,14 +166,39 @@ jobs:
           ditto -c -k --sequesterRsrc --keepParent "$t" "$t.zip"
 
       - name: Buat DMG
+        # Runner macOS kadang menjawab "Resource busy" karena Spotlight masih
+        # memegang folder sumber. Karena itu: staging di dalam workspace,
+        # nama volume unik per arsitektur, dan diulang beberapa kali.
+        # Bila tetap gagal, langkah ini tidak menggagalkan job — versi ZIP
+        # portable sudah berisi aplikasi yang sama.
+        continue-on-error: true
         run: |
-          staging="$(mktemp -d)"
+          staging="dmg-staging"
+          volume="Pembukuan Kantin (${{ matrix.arsitektur }})"
+          nama="KantinKoperasi-macOS-${{ matrix.arsitektur }}.dmg"
+
+          rm -rf "$staging"; mkdir -p "$staging"
           cp -R dist/KantinKoperasi.app "$staging/"
           ln -s /Applications "$staging/Applications"
           cp -f PANDUAN.md "$staging/" || true
-          hdiutil create -volname "Pembukuan Kantin Koperasi" \
-            -srcfolder "$staging" -ov -format UDZO \
-            "KantinKoperasi-macOS-${{ matrix.arsitektur }}.dmg"
+          # Jangan biarkan Spotlight mengindeks folder sumber
+          mdutil -i off "$PWD" >/dev/null 2>&1 || true
+          sync
+
+          for percobaan in 1 2 3; do
+            rm -f "$nama"
+            hdiutil detach "/Volumes/$volume" -force >/dev/null 2>&1 || true
+            if hdiutil create -volname "$volume" -srcfolder "$staging" \
+                 -ov -format UDZO -fs HFS+ "$nama"; then
+              echo "DMG berhasil dibuat pada percobaan ke-$percobaan."
+              exit 0
+            fi
+            echo "Percobaan ke-$percobaan gagal; menunggu 15 detik lalu mengulang."
+            sleep 15
+          done
+
+          echo "::warning::DMG tidak dapat dibuat di runner ini. Versi portable (.zip) berisi aplikasi yang sama dan tetap tersedia."
+          exit 0
 
       - uses: actions/upload-artifact@v4
         with:
@@ -184,6 +209,7 @@ jobs:
         with:
           name: macOS-DMG-${{ matrix.arsitektur }}
           path: KantinKoperasi-macOS-${{ matrix.arsitektur }}.dmg
+          if-no-files-found: warn
 
   # ===================================================================== #
   rilis:
